@@ -12,15 +12,16 @@ import { StepShipping } from "./step-shipping";
 import { StepPayment } from "./step-payment";
 import { CheckoutSuccess } from "./checkout-success";
 
-interface FormData {
+export interface FormData {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  address: string;
-  city: string;
-  postalCode: string;
-  country: string;
+  cityName: string;
+  cityRef: string;
+  warehouseRef: string;
+  warehouseDescription: string;
+  comment: string;
 }
 
 export function CheckoutForm() {
@@ -35,19 +36,20 @@ export function CheckoutForm() {
     lastName: "",
     email: "",
     phone: "",
-    address: "",
-    city: "",
-    postalCode: "",
-    country: "Ukraine",
+    cityName: "",
+    cityRef: "",
+    warehouseRef: "",
+    warehouseDescription: "",
+    comment: "",
   });
 
   if (items.length === 0 && !orderId) {
     return (
       <div className="max-w-[600px] mx-auto px-6 py-20 text-center">
-        <p className="font-mono text-sm">Кошик порожній</p>
+        <p className="text-sm">Кошик порожній</p>
         <button
           onClick={() => router.push("/")}
-          className="mt-4 font-mono text-sm underline"
+          className="mt-4 text-sm text-coral hover:text-coral/80"
         >
           Повернутися до магазину
         </button>
@@ -90,11 +92,12 @@ export function CheckoutForm() {
         quantity: item.quantity,
       })),
       shippingDetails: {
-        address: formData.address,
-        city: formData.city,
-        postalCode: formData.postalCode,
-        country: formData.country,
+        city: formData.cityName,
+        cityRef: formData.cityRef,
+        warehouseRef: formData.warehouseRef,
+        warehouseDescription: formData.warehouseDescription,
       },
+      comment: formData.comment || undefined,
     };
 
     try {
@@ -113,8 +116,8 @@ export function CheckoutForm() {
   return (
     <div className="max-w-[600px] mx-auto px-6">
       {stockError && (
-        <div className="border border-system-red p-4 mb-8">
-          <p className="font-mono text-sm text-system-red">{stockError}</p>
+        <div className="bg-coral/10 border border-coral/20 rounded-xl p-4 mb-8">
+          <p className="text-sm text-coral">{stockError}</p>
         </div>
       )}
 
@@ -124,15 +127,16 @@ export function CheckoutForm() {
         updateField={updateField}
       />
 
-      <div className="border-b border-black" />
+      <div className="border-b border-stone-200/50" />
 
       <StepShipping
         formData={formData}
+        setFormData={setFormData}
         errors={errors}
-        updateField={updateField}
+        setErrors={setErrors}
       />
 
-      <div className="border-b border-black" />
+      <div className="border-b border-stone-200/50" />
 
       <StepPayment
         items={items}

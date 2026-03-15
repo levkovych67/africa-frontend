@@ -53,13 +53,15 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
 
   if (images.length === 0) {
     return (
-      <div className="block p-4">
-        <div className="aspect-square bg-surface-muted mb-4 flex items-center justify-center">
-          <span className="font-mono text-xs text-black/30">Немає фото</span>
+      <div className="rounded-2xl overflow-hidden shadow-soft">
+        <div className="aspect-[4/5] bg-stone-100/50 flex items-center justify-center">
+          <span className="font-grotesk text-xs text-stone-400">Немає фото</span>
         </div>
-        <div className="flex justify-between items-start">
-          <h3 className="text-base font-serif italic">{product.title}</h3>
-          <span className="text-sm font-mono">{formatPrice(product.basePrice)}</span>
+        <div className="bg-white rounded-b-2xl p-4">
+          <div className="flex justify-between items-start">
+            <h3 className="font-jakarta font-semibold text-base text-stone-900">{product.title}</h3>
+            <span className="font-grotesk text-sm text-stone-900">{formatPrice(product.basePrice)}</span>
+          </div>
         </div>
       </div>
     );
@@ -68,11 +70,11 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="group block p-4 cursor-pointer hover:bg-surface-muted transition-none"
+      className="group block rounded-2xl overflow-hidden shadow-soft hover:-translate-y-1 hover:shadow-lift transition-all duration-300"
     >
       {/* Desktop: hover zone carousel */}
       <div
-        className="relative aspect-square bg-surface-muted mb-4 overflow-hidden hidden md:block"
+        className="relative aspect-[4/5] rounded-t-2xl overflow-hidden hidden md:block"
         onMouseEnter={handleMouseEnter}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -82,7 +84,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           src={images[0]}
           alt={`${product.title} 1`}
           fill
-          className={`object-cover w-full h-full mix-blend-multiply transition-opacity duration-200 ease-in-out ${
+          className={`object-cover w-full h-full transition-opacity duration-200 ease-in-out ${
             activeIndex === 0 ? "opacity-100" : "opacity-0"
           }`}
           sizes="(max-width: 1024px) 50vw, 25vw"
@@ -97,7 +99,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
               src={img}
               alt={`${product.title} ${i + 2}`}
               fill
-              className={`object-cover w-full h-full mix-blend-multiply transition-opacity duration-200 ease-in-out ${
+              className={`object-cover w-full h-full transition-opacity duration-200 ease-in-out ${
                 i + 1 === activeIndex ? "opacity-100" : "opacity-0"
               }`}
               sizes="(max-width: 1024px) 50vw, 25vw"
@@ -111,7 +113,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
               <div
                 key={i}
                 className={`h-[2px] flex-1 transition-colors duration-0 ${
-                  i === activeIndex ? "bg-black" : "bg-black/20"
+                  i === activeIndex ? "bg-white" : "bg-white/50"
                 }`}
               />
             ))}
@@ -120,7 +122,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       </div>
 
       {/* Mobile: snap-scroll carousel — only first 2 images eager, rest lazy */}
-      <div className="relative aspect-square bg-surface-muted mb-4 overflow-hidden md:hidden">
+      <div className="relative aspect-[4/5] rounded-t-2xl overflow-hidden md:hidden">
         <div
           ref={scrollRef}
           onScroll={handleScroll}
@@ -132,7 +134,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                 src={img}
                 alt={`${product.title} ${i + 1}`}
                 fill
-                className="object-cover mix-blend-multiply"
+                className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority={priority && i === 0}
                 loading={i < 2 ? "eager" : "lazy"}
@@ -148,7 +150,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
               <div
                 key={i}
                 className={`w-1.5 h-1.5 transition-colors duration-0 ${
-                  i === activeIndex ? "bg-black" : "bg-black/25"
+                  i === activeIndex ? "bg-white" : "bg-white/50"
                 }`}
               />
             ))}
@@ -156,9 +158,25 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         )}
       </div>
 
-      <div className="flex justify-between items-start">
-        <h3 className="text-base font-serif font-bold">{product.title}</h3>
-        <span className="text-sm font-mono">{formatPrice(product.basePrice)}</span>
+      <div className="bg-white rounded-b-2xl p-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-jakarta font-semibold text-base text-stone-900">{product.title}</h3>
+            {product.artistName && (
+              <span
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.location.href = `/artist/${product.artistSlug}`;
+                }}
+                className="text-sm text-stone-500 hover:text-coral mt-0.5 block cursor-pointer"
+              >
+                {product.artistName}
+              </span>
+            )}
+          </div>
+          <span className="font-grotesk text-sm text-stone-900">{formatPrice(product.basePrice)}</span>
+        </div>
       </div>
     </Link>
   );

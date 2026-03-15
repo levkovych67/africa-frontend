@@ -13,7 +13,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
   return (
     <div className="flex gap-4">
-      <div className="relative h-24 w-20 shrink-0">
+      <div className="relative h-24 w-20 shrink-0 rounded-lg overflow-hidden">
         {item.image && (
           <Image
             src={item.image}
@@ -27,29 +27,29 @@ export function CartItemRow({ item }: CartItemRowProps) {
       <div className="flex flex-1 flex-col justify-between">
         <div>
           <p className="text-sm font-medium">{item.productTitle}</p>
-          <p className="font-mono text-xs text-black/60">
+          <p className="font-grotesk text-xs text-stone-500">
             {item.variantLabel}
           </p>
         </div>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 border border-black">
+          <div className="flex items-center gap-2 bg-stone-100 rounded-full">
             <button
               type="button"
               onClick={() => updateQuantity(item.sku, item.quantity - 1)}
-              className="px-3 py-1 font-mono text-sm"
+              className="px-3 py-1 font-jakarta text-sm"
             >
               −
             </button>
-            <span className="font-mono text-sm">{item.quantity}</span>
+            <span className="font-jakarta text-sm">{item.quantity}</span>
             <button
               type="button"
               onClick={() => updateQuantity(item.sku, item.quantity + 1)}
-              className="px-3 py-1 font-mono text-sm"
+              className="px-3 py-1 font-jakarta text-sm"
             >
               +
             </button>
           </div>
-          <span className="font-mono text-sm">
+          <span className="font-grotesk text-sm">
             {formatPrice(item.unitPrice * item.quantity)}
           </span>
         </div>
@@ -57,7 +57,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
       <button
         type="button"
         onClick={() => removeItem(item.sku)}
-        className="self-start font-mono text-xs text-black/40 hover:text-black"
+        className="self-start text-xs text-stone-400 hover:text-coral"
       >
         X
       </button>

@@ -18,12 +18,11 @@ export function PrecisionButton({
   return (
     <button
       className={`
-        py-4 px-8 font-mono uppercase tracking-widest text-sm
-        border border-black
-        bg-black text-white
-        hover:bg-white hover:text-black
-        transition-colors duration-0
-        ${isDisabled ? "opacity-30 cursor-not-allowed line-through hover:bg-black hover:text-white" : ""}
+        rounded-full py-3.5 px-8 font-jakarta font-bold text-xs uppercase tracking-wider
+        bg-coral text-white
+        hover:scale-[1.02] hover:shadow-glow
+        transition-all duration-200 ease-out
+        ${isDisabled ? "opacity-40 cursor-not-allowed" : ""}
         ${className}
       `}
       disabled={isDisabled}

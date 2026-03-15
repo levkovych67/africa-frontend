@@ -1,5 +1,4 @@
-import { Inter, JetBrains_Mono } from "next/font/google";
-import localFont from "next/font/local";
+import { Inter, Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 
 export const inter = Inter({
   variable: "--font-inter",
@@ -7,14 +6,14 @@ export const inter = Inter({
   display: "swap",
 });
 
-export const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["cyrillic", "latin"],
+export const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["cyrillic-ext", "latin"],
   display: "swap",
 });
 
-export const webServeroff = localFont({
-  src: "../../public/fonts/Web Serveroff.ttf",
-  variable: "--font-serveroff",
+export const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
   display: "swap",
 });

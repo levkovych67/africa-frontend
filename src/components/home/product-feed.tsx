@@ -9,16 +9,16 @@ export function ProductFeed() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 px-6 md:px-8">
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="border-b border-r border-black p-4"
+            className="rounded-2xl overflow-hidden shadow-soft"
           >
-            <div className="aspect-square bg-surface-muted animate-pulse mb-4" />
+            <div className="aspect-square bg-stone-100 animate-pulse mb-4" />
             <div className="flex justify-between">
-              <div className="h-4 w-1/2 bg-surface-muted animate-pulse" />
-              <div className="h-4 w-1/4 bg-surface-muted animate-pulse" />
+              <div className="h-4 w-1/2 bg-stone-100 animate-pulse" />
+              <div className="h-4 w-1/4 bg-stone-100 animate-pulse" />
             </div>
           </div>
         ))}
@@ -28,7 +28,7 @@ export function ProductFeed() {
 
   if (error) {
     return (
-      <div className="py-20 text-center font-mono text-sm">
+      <div className="py-20 text-center text-sm text-stone-500">
         Помилка завантаження товарів
       </div>
     );
@@ -38,7 +38,7 @@ export function ProductFeed() {
 
   if (products.length === 0) {
     return (
-      <div className="py-20 text-center font-mono text-sm">
+      <div className="py-20 text-center text-sm text-stone-500">
         Товари незабаром з&apos;являться
       </div>
     );

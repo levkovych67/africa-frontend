@@ -9,11 +9,13 @@ interface PageTransitionProps {
 export function PageTransition({ children }: PageTransitionProps) {
   return (
     <motion.div
-      initial={false}
-      animate={{ clipPath: "inset(0 0 0 0)" }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.6,
-        ease: [0.77, 0, 0.175, 1],
+        type: "spring",
+        stiffness: 250,
+        damping: 25,
+        mass: 0.5,
       }}
     >
       {children}

@@ -17,7 +17,7 @@ interface StepContactsProps {
 export function StepContacts({ formData, errors, updateField }: StepContactsProps) {
   return (
     <div className="py-8">
-      <h2 className="font-mono text-sm uppercase tracking-widest mb-6">
+      <h2 className="font-jakarta font-bold text-xs uppercase tracking-wider mb-6">
         1. Контакти
       </h2>
       <div className="flex flex-col gap-4">

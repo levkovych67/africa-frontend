@@ -1,8 +1,8 @@
 export interface ShippingDetails {
-  address: string;
   city: string;
-  postalCode: string;
-  country: string;
+  cityRef: string;
+  warehouseRef: string;
+  warehouseDescription: string;
 }
 
 export interface CheckoutItem {
@@ -18,6 +18,7 @@ export interface CheckoutPayload {
   phone: string;
   items: CheckoutItem[];
   shippingDetails: ShippingDetails;
+  comment?: string;
 }
 
 export interface OrderItem {
@@ -27,6 +28,19 @@ export interface OrderItem {
   variantName: string;
   quantity: number;
   unitPrice: number;
+}
+
+export interface NovaCity {
+  ref: string;
+  name: string;
+  region: string;
+}
+
+export interface NovaWarehouse {
+  ref: string;
+  description: string;
+  number: string;
+  shortAddress: string;
 }
 
 export interface OrderResponse {
@@ -42,6 +56,7 @@ export interface OrderResponse {
     trackingNumber: string | null;
     carrier: string | null;
   };
+  comment: string | null;
   createdAt: string;
   updatedAt: string | null;
 }

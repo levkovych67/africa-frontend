@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { inter, jetbrainsMono, webServeroff } from "@/lib/fonts";
+import { inter, plusJakartaSans, spaceGrotesk } from "@/lib/fonts";
 import { Providers } from "@/lib/providers";
 import "./globals.css";
 
@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk">
-      <body className={`${inter.variable} ${jetbrainsMono.variable} ${webServeroff.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${plusJakartaSans.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -17,7 +17,7 @@ export function SizeSelector({
 }: SizeSelectorProps) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="font-mono text-xs uppercase tracking-wide">{label}</span>
+      <span className="font-jakarta font-bold text-xs uppercase tracking-wider text-stone-500">{label}</span>
       <div className="grid grid-cols-4 gap-2">
         {values.map((value) => {
           const isUnavailable = unavailableValues.includes(value);
@@ -30,8 +30,8 @@ export function SizeSelector({
               onClick={() => !isUnavailable && onSelect(value)}
               disabled={isUnavailable}
               className={`
-                py-3 text-center font-mono text-sm border
-                ${isSelected ? "bg-black text-white border-black" : "bg-white text-black border-black"}
+                rounded-xl border border-stone-200 py-3 text-center font-jakarta text-sm transition-all duration-200
+                ${isSelected ? "bg-coral text-white border-coral" : "bg-white text-stone-900 border-stone-200 hover:border-stone-400"}
                 ${isUnavailable ? "opacity-30 line-through cursor-not-allowed" : "cursor-pointer"}
               `}
             >

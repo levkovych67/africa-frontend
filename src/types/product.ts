@@ -19,6 +19,9 @@ export interface Product {
   attributes: ProductAttribute[];
   variants: ProductVariant[];
   images: string[];
+  artistId: string | null;
+  artistName: string | null;
+  artistSlug: string | null;
   status: "ACTIVE" | "DRAFT" | "ARCHIVED";
   createdAt: string;
   updatedAt: string;

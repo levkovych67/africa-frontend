@@ -12,11 +12,11 @@ export function OrderSummary({ items }: OrderSummaryProps) {
         <div key={item.sku} className="flex justify-between items-start">
           <div>
             <p className="text-sm font-medium">{item.productTitle}</p>
-            <p className="font-mono text-xs text-black/60">
+            <p className="font-grotesk text-xs text-stone-500">
               {item.variantLabel} x {item.quantity}
             </p>
           </div>
-          <span className="font-mono text-sm">
+          <span className="font-grotesk text-sm">
             {formatPrice(item.unitPrice * item.quantity)}
           </span>
         </div>

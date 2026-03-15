@@ -15,20 +15,22 @@ export function FormInput({
 }: FormInputProps) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="font-mono text-xs tracking-wide uppercase">
+      <label className="font-jakarta font-bold text-xs uppercase tracking-wider text-stone-500">
         {label}
       </label>
       <input
         className={`
-          w-full py-3 bg-transparent border-b border-black outline-none
-          focus:border-b-2 placeholder:text-black/50 rounded-none
-          ${error ? "border-alert" : ""}
+          w-full py-3 px-4 bg-white border border-stone-200 rounded-xl outline-none
+          focus:border-coral focus:ring-2 focus:ring-coral/20
+          placeholder:text-stone-400
+          transition-all duration-200
+          ${error ? "border-coral" : ""}
           ${className}
         `}
         {...props}
       />
       {error && (
-        <span className="font-mono text-xs text-alert">{error}</span>
+        <span className="text-coral text-xs">{error}</span>
       )}
     </div>
   );

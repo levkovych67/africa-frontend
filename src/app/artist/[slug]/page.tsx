@@ -1,13 +1,13 @@
-import { ProductDetail } from "@/components/product/product-detail";
+import { ArtistDetail } from "@/components/artist/artist-detail";
 import { Header } from "@/components/layout/header";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { PageTransition } from "@/components/layout/page-transition";
 
-interface ProductPageProps {
+interface ArtistPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: ProductPageProps) {
+export async function generateMetadata({ params }: ArtistPageProps) {
   const { slug } = await params;
   const title = slug
     .split("-")
@@ -16,11 +16,11 @@ export async function generateMetadata({ params }: ProductPageProps) {
 
   return {
     title: `${title} — AFRICA SHOP`,
-    description: `${title} — КОЛЕКЦІЯ 2026`,
+    description: `${title} — артист`,
   };
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ArtistPage({ params }: ArtistPageProps) {
   const { slug } = await params;
 
   return (
@@ -28,8 +28,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <Header />
       <CartDrawer />
       <PageTransition>
-        <main className="bg-pearl py-8">
-          <ProductDetail slug={slug} />
+        <main>
+          <ArtistDetail slug={slug} />
         </main>
       </PageTransition>
     </>

@@ -2,17 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-*,
-*::before,
-*::after {
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
 body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: theme("colors.bg-primary");
-  color: theme("colors.ink-primary");
+  background-color: #FDFCFB;
+  color: #1C1917;
 }

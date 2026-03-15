@@ -14,7 +14,7 @@ export default function CheckoutPage() {
       <Header />
       <CartDrawer />
       <PageTransition>
-        <main className="py-12">
+        <main className="bg-pearl py-12">
           <CheckoutForm />
         </main>
       </PageTransition>

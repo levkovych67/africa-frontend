@@ -4,32 +4,35 @@ import plugin from "tailwindcss/plugin";
 const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    colors: {
-      black: "#000000",
-      white: "#FFFFFF",
-      transparent: "transparent",
-      "bg-primary": "#FFFFFF",
-      "ink-primary": "#000000",
-      "surface-muted": "#F4F4F4",
-      alert: "#FF0000",
-    },
-    borderRadius: {
-      none: "0px",
-    },
-    boxShadow: {
-      none: "0 0 #0000",
-    },
     extend: {
+      colors: {
+        pearl: "#FDFCFB",
+        coral: "#FF5A5F",
+        emerald: "#10B981",
+        stone: {
+          50: "#FAFAF9",
+          100: "#F5F5F4",
+          200: "#E7E5E4",
+          500: "#78716C",
+          900: "#1C1917",
+        },
+      },
       fontFamily: {
         sans: ["var(--font-inter)", "Helvetica Neue", "Arial", "sans-serif"],
-        mono: ["var(--font-jetbrains-mono)", "Courier New", "monospace"],
-        serif: ["var(--font-serveroff)", "Georgia", "serif"],
+        jakarta: ["var(--font-jakarta)", "var(--font-inter)", "sans-serif"],
+        grotesk: ["var(--font-space-grotesk)", "var(--font-inter)", "monospace"],
+      },
+      boxShadow: {
+        soft: "0 8px 30px rgba(28,25,23,0.05)",
+        lift: "0 20px 40px rgba(28,25,23,0.08)",
+        glow: "0 0 20px rgba(255,90,95,0.15)",
       },
       letterSpacing: {
         tightest: "-0.04em",
         tighter: "-0.02em",
         tight: "-0.01em",
         normal: "0em",
+        wider: "0.03em",
         widest: "0.05em",
       },
     },
@@ -38,14 +41,16 @@ const config: Config = {
     plugin(function ({ addUtilities }) {
       addUtilities({
         ".text-h1-hero": {
-          "font-size": "clamp(2.5rem, 8vw, 5rem)",
-          "font-weight": "700",
+          "font-family": "var(--font-jakarta), var(--font-inter), sans-serif",
+          "font-size": "clamp(2.5rem, 8vw, 6rem)",
+          "font-weight": "800",
           "letter-spacing": "-0.02em",
           "line-height": "1",
         },
         ".text-h2-section": {
+          "font-family": "var(--font-jakarta), var(--font-inter), sans-serif",
           "font-size": "clamp(1.5rem, 4vw, 2.5rem)",
-          "font-weight": "600",
+          "font-weight": "700",
           "letter-spacing": "-0.01em",
           "line-height": "1.1",
         },
@@ -53,14 +58,13 @@ const config: Config = {
           "font-size": "1rem",
           "font-weight": "400",
           "letter-spacing": "0em",
-          "line-height": "1.6",
+          "line-height": "1.5",
         },
-        ".text-tech-data": {
-          "font-family":
-            "var(--font-jetbrains-mono), Courier New, monospace",
+        ".text-label": {
+          "font-family": "var(--font-jakarta), var(--font-inter), sans-serif",
           "font-size": "0.75rem",
-          "font-weight": "400",
-          "letter-spacing": "0.05em",
+          "font-weight": "700",
+          "letter-spacing": "0.03em",
           "text-transform": "uppercase",
         },
       });

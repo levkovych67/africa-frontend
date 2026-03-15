@@ -9,7 +9,7 @@ export function Header() {
   const count = totalItems();
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white border-b border-black h-16 px-4 md:px-8 flex justify-between items-center">
+    <header className="sticky top-0 z-50 w-full bg-white/70 backdrop-blur-md h-16 px-6 md:px-12 flex justify-between items-center border-b border-stone-200/30">
       <Link href="/" className="flex items-center gap-3">
         <Image
           src="/images/new logo.PNG"
@@ -23,7 +23,7 @@ export function Header() {
       <button
         type="button"
         onClick={openCart}
-        className="font-mono text-sm uppercase tracking-widest"
+        className="font-jakarta font-bold text-xs uppercase tracking-wider"
       >
         Кошик{count > 0 && ` (${count})`}
       </button>

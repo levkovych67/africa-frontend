@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Product } from "@/types/product";
 import { useCartStore } from "@/store/cart";
 import { findVariant } from "@/lib/utils/variant";
@@ -56,14 +57,23 @@ export function CommandCenter({ product }: CommandCenterProps) {
 
   return (
     <div className="sticky top-8 p-6 lg:p-8">
-      <h1 className="text-h2-section font-serif font-bold">
+      <h1 className="text-h2-section font-jakarta font-bold">
         {product.title}
       </h1>
 
-      <p className="font-mono text-lg mt-2">{formatPrice(price)}</p>
+      {product.artistName && (
+        <Link
+          href={`/artist/${product.artistSlug}`}
+          className="text-sm text-stone-500 hover:text-coral block mt-1"
+        >
+          {product.artistName}
+        </Link>
+      )}
+
+      <p className="font-grotesk text-xl mt-2">{formatPrice(price)}</p>
 
       {allVariantsOutOfStock && (
-        <p className="font-mono text-sm text-alert mt-2 uppercase tracking-wide">
+        <p className="font-jakarta font-bold text-xs text-coral mt-2 uppercase tracking-wider">
           Розпродано
         </p>
       )}

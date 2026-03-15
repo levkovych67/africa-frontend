@@ -12,7 +12,7 @@ export default function Home() {
       <PageTransition>
         <main>
           <HeroSection />
-          <section className="pt-0">
+          <section className="relative z-10 py-8">
             <ProductFeed />
           </section>
         </main>

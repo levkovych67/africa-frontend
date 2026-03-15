@@ -7,10 +7,8 @@ export function validateCheckout(data: {
   lastName: string;
   email: string;
   phone: string;
-  address: string;
-  city: string;
-  postalCode: string;
-  country: string;
+  cityRef: string;
+  warehouseRef: string;
 }): ValidationErrors {
   const errors: ValidationErrors = {};
 
@@ -22,10 +20,8 @@ export function validateCheckout(data: {
     errors.email = "Невірний формат електронної пошти";
   }
   if (!data.phone.trim()) errors.phone = "Обов'язкове поле";
-  if (!data.address.trim()) errors.address = "Обов'язкове поле";
-  if (!data.city.trim()) errors.city = "Обов'язкове поле";
-  if (!data.postalCode.trim()) errors.postalCode = "Обов'язкове поле";
-  if (!data.country.trim()) errors.country = "Обов'язкове поле";
+  if (!data.cityRef) errors.cityRef = "Оберіть місто";
+  if (!data.warehouseRef) errors.warehouseRef = "Оберіть відділення";
 
   return errors;
 }
