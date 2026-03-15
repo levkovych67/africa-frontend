@@ -1,0 +1,115 @@
+"use client";
+
+import { useState } from "react";
+import { Product } from "@/types/product";
+import { useCartStore } from "@/store/cart";
+import { findVariant } from "@/lib/utils/variant";
+import { formatPrice } from "@/lib/utils/price";
+import { PrecisionButton } from "@/components/ui/precision-button";
+import { SizeSelector } from "@/components/ui/size-selector";
+import { Accordion } from "@/components/ui/accordion";
+
+interface CommandCenterProps {
+  product: Product;
+}
+
+export function CommandCenter({ product }: CommandCenterProps) {
+  const [selectedAttributes, setSelectedAttributes] = useState<
+    Record<string, string>
+  >({});
+  const { addItem, openCart } = useCartStore();
+
+  const resolvedVariant = findVariant(product.variants, selectedAttributes);
+  const price = resolvedVariant
+    ? product.basePrice + resolvedVariant.priceModifier
+    : product.basePrice;
+  const isInStock = resolvedVariant ? resolvedVariant.stock > 0 : false;
+  const allSelected = product.attributes.every(
+    (attr) => selectedAttributes[attr.type]
+  );
+
+  const handleSelect = (type: string, value: string) => {
+    setSelectedAttributes((prev) => ({ ...prev, [type]: value }));
+  };
+
+  const handleAddToCart = () => {
+    if (!resolvedVariant || !allSelected) return;
+
+    const variantLabel = Object.entries(resolvedVariant.attributes)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(", ");
+
+    addItem({
+      productId: product.id,
+      productTitle: product.title,
+      sku: resolvedVariant.sku,
+      variantLabel,
+      unitPrice: price,
+      quantity: 1,
+      image: product.images[0] || "",
+    });
+
+    openCart();
+  };
+
+  const allVariantsOutOfStock = product.variants.every((v) => v.stock === 0);
+
+  return (
+    <div className="sticky top-8 p-6 lg:p-8">
+      <h1 className="text-h2-section font-serif font-bold">
+        {product.title}
+      </h1>
+
+      <p className="font-mono text-lg mt-2">{formatPrice(price)}</p>
+
+      {allVariantsOutOfStock && (
+        <p className="font-mono text-sm text-alert mt-2 uppercase tracking-wide">
+          Розпродано
+        </p>
+      )}
+
+      <div className="mt-8 flex flex-col gap-6">
+        {product.attributes.map((attr) => (
+          <SizeSelector
+            key={attr.type}
+            label={attr.type}
+            values={attr.values}
+            selected={selectedAttributes[attr.type] || null}
+            onSelect={(value) => handleSelect(attr.type, value)}
+          />
+        ))}
+      </div>
+
+      <div className="mt-8">
+        <PrecisionButton
+          onClick={handleAddToCart}
+          disabled={!allSelected || !isInStock || allVariantsOutOfStock}
+          className="w-full"
+        >
+          {allVariantsOutOfStock
+            ? "Розпродано"
+            : !allSelected
+              ? "Оберіть варіант"
+              : !isInStock
+                ? "Немає в наявності"
+                : "Додати в кошик"}
+        </PrecisionButton>
+      </div>
+
+      <div className="mt-8">
+        <Accordion title="Опис" defaultOpen>
+          <p>{product.description || "Опис незабаром буде додано."}</p>
+        </Accordion>
+        <Accordion title="Склад">
+          <p>Інформація про склад буде додана пізніше.</p>
+        </Accordion>
+        <Accordion title="Доставка">
+          <p>
+            Доставка по Україні — Нова Пошта. Термін доставки 1-3 робочі дні.
+            Безкоштовна доставка при замовленні від 2000 UAH.
+          </p>
+        </Accordion>
+      </div>
+    </div>
+  );
+}

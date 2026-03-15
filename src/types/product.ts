@@ -1,0 +1,25 @@
+export interface ProductAttribute {
+  type: string;
+  values: string[];
+}
+
+export interface ProductVariant {
+  sku: string;
+  attributes: Record<string, string>;
+  priceModifier: number;
+  stock: number;
+}
+
+export interface Product {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  basePrice: number;
+  attributes: ProductAttribute[];
+  variants: ProductVariant[];
+  images: string[];
+  status: "ACTIVE" | "DRAFT" | "ARCHIVED";
+  createdAt: string;
+  updatedAt: string;
+}
