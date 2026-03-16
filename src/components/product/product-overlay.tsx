@@ -357,27 +357,26 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Physics wrapper — the card */}
-          <div className="fixed inset-x-0 top-20 bottom-4 left-4 right-4 z-50 pointer-events-none">
-            <motion.div
-              key="overlay-card"
-              initial={{ y: "100vh" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100vh" }}
-              transition={{
-                type: "spring",
-                damping: 30,
-                stiffness: 300,
-                mass: 0.8,
-              }}
-              style={{ y: cardY }}
-              className="h-full bg-white rounded-3xl shadow-lift flex flex-col overflow-hidden pointer-events-auto"
-            >
-              {/* Content container — native scroll */}
-              <div
-                ref={scrollRef}
-                onScroll={checkBottom}
-                className="flex-1 overflow-y-auto overscroll-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          {/* Scrollable wrapper — scrolls the card itself */}
+          <div
+            ref={scrollRef}
+            onScroll={checkBottom}
+            className="fixed inset-x-0 top-20 bottom-0 z-50 overflow-y-auto overscroll-none pointer-events-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            <div className="px-4 pb-4 min-h-full">
+              <motion.div
+                key="overlay-card"
+                initial={{ y: "100vh" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100vh" }}
+                transition={{
+                  type: "spring",
+                  damping: 30,
+                  stiffness: 300,
+                  mass: 0.8,
+                }}
+                style={{ y: cardY }}
+                className="bg-white rounded-3xl shadow-lift overflow-hidden"
               >
                 <div className="px-6 pt-6 pb-6">
                   {isLoading || !product ? (
@@ -401,24 +400,21 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
                     </>
                   )}
                 </div>
-              </div>
 
-              {/* Close button — appears after scrolling */}
-              <AnimatePresence>
+                {/* Close button — appears after scrolling */}
                 {showClose && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
+                  <div
                     onClick={() => setIsOpen(false)}
                     className="flex justify-center py-3 cursor-pointer bg-stone-50/80 backdrop-blur-sm"
                   >
                     <span className="font-jakarta text-[9px] text-stone-500 uppercase tracking-wider">закрити</span>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
-            </motion.div>
+              </motion.div>
+            </div>
+
+            {/* Extra space below card for rubber-band overscroll */}
+            <div className="h-32" />
           </div>
         </>
       )}
