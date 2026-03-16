@@ -1,7 +1,13 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence, useMotionValue, animate } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useTransform,
+  animate,
+} from "framer-motion";
 import Image from "next/image";
 import { useProduct } from "@/hooks/use-products";
 import { CommandCenter } from "./command-center";
@@ -71,24 +77,35 @@ function OverlayCarousel({
   );
 }
 
+// ─── iOS Rubber Band Dismissal ──────────────────────────────────────
+
 export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
   const { data: product, isLoading } = useProduct(slug);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(true);
   const [isEjecting, setIsEjecting] = useState(false);
+  const [showClose, setShowClose] = useState(false);
 
-  // Motion values for the sheet
-  const sheetY = useMotionValue(0);
-  const sheetOpacity = useMotionValue(1);
+  // Physics wrapper Y — the "rubber band" axis
+  const cardY = useMotionValue(0);
+  // Backdrop opacity fades as card is pulled
+  const backdropOpacity = useTransform(cardY, [-120, 0], [0.5, 1]);
 
-  // Overscroll state
-  const atBottomRef = useRef(false);
-  const overscrollAccum = useRef(0);
-  const lastTouchY = useRef(0);
-  const isOverscrolling = useRef(false);
+  // Rubber band state
+  const isAtBottomRef = useRef(false);
+  const pullAccumRef = useRef(0);
+  const lastTouchYRef = useRef(0);
+  const isPullingRef = useRef(false);
 
-  const releaseThreshold = 120; // px of sheet translation before ejection
-  const resistance = 0.4; // 2.5px scroll = 1px movement
+  // Gate: pull only unlocks on a NEW gesture that starts while already at bottom
+  const pullUnlockedRef = useRef(false);
+
+  // iOS resistance — progressively harder to pull
+  const pullResistance = 0.35;
+  // Ejection threshold in card-pixels (not scroll-pixels)
+  const ejectionThreshold = 120;
+
+  const wheelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -97,192 +114,253 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
     };
   }, []);
 
-  const handleClose = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
-  // Eject — fade out and close
-  const eject = useCallback(() => {
-    if (isEjecting) return;
-    setIsEjecting(true);
-    animate(sheetOpacity, 0, {
-      duration: 0.25,
-      ease: [0.16, 1, 0.3, 1],
-    }).then(() => {
-      onClose();
-    });
-  }, [isEjecting, sheetOpacity, onClose]);
-
-  // Snap the sheet back to y=0 with critically damped spring
-  const snapBack = useCallback(() => {
-    overscrollAccum.current = 0;
-    isOverscrolling.current = false;
-    animate(sheetY, 0, {
-      type: "spring",
-      stiffness: 800,
-      damping: 40,
-    });
-  }, [sheetY]);
-
-  // Apply overscroll offset with resistance
-  const applyOverscroll = useCallback(
-    (delta: number) => {
-      if (isEjecting) return false;
-
-      // Not at bottom or scrolling up — don't consume, but don't snap back here
-      if (!atBottomRef.current || delta <= 0) {
-        return false;
-      }
-
-      isOverscrolling.current = true;
-      overscrollAccum.current += delta * resistance;
-
-      const offset = -overscrollAccum.current; // negative = sheet moves up
-      sheetY.set(offset);
-
-      // Check if past breaking point
-      if (overscrollAccum.current >= releaseThreshold) {
-        eject();
-      }
-
-      return true; // consumed the event
-    },
-    [isEjecting, sheetY, eject]
-  );
-
-  // Track scroll position to detect bottom
-  const handleScroll = useCallback(() => {
+  // ─── Scroll edge detection ────────────────────────────────────────
+  const checkBottom = useCallback(() => {
     if (!scrollRef.current) return;
     const el = scrollRef.current;
-    atBottomRef.current =
-      el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
-  }, []);
+    const atBottom = Math.abs(el.scrollHeight - el.clientHeight - el.scrollTop) < 1;
+    isAtBottomRef.current = atBottom;
+    // Reset unlock if user scrolls away from bottom
+    if (!atBottom) {
+      pullUnlockedRef.current = false;
+    }
+    // Show close button after scrolling 100px
+    if (el.scrollTop > 100 && !showClose) {
+      setShowClose(true);
+    }
+  }, [showClose]);
 
-  // Pull-down-from-top drag dismiss (existing mechanic)
-  const [canDragDown, setCanDragDown] = useState(true);
-  const handleScrollForDrag = useCallback(() => {
-    if (!scrollRef.current) return;
-    setCanDragDown(scrollRef.current.scrollTop <= 0);
-    handleScroll();
-  }, [handleScroll]);
+  // ─── Ejection: card flies up off screen ───────────────────────────
+  const ejectCard = useCallback(() => {
+    if (isEjecting) return;
+    setIsEjecting(true);
+    animate(cardY, -window.innerHeight, {
+      ease: "easeOut",
+      duration: 0.25,
+    }).then(() => onClose());
+  }, [isEjecting, cardY, onClose]);
 
-  // Wheel: overscroll ejection at bottom with debounced snap-back
+  // ─── Snap back: rubber band release ───────────────────────────────
+  const snapBack = useCallback(() => {
+    pullAccumRef.current = 0;
+    isPullingRef.current = false;
+    animate(cardY, 0, {
+      type: "spring",
+      stiffness: 500,
+      damping: 40,
+    });
+  }, [cardY]);
+
+  // ─── Apply rubber band pull (returns true if consumed) ────────────
+  const applyPull = useCallback(
+    (scrollDelta: number): boolean => {
+      if (isEjecting) return false;
+      if (!isAtBottomRef.current) return false;
+      if (!pullUnlockedRef.current) return false; // not unlocked yet — wait for next gesture
+      if (scrollDelta <= 0) return false;
+
+      isPullingRef.current = true;
+      pullAccumRef.current += scrollDelta;
+
+      // iOS resistance: progressively harder
+      const resistedY = -(pullAccumRef.current * pullResistance);
+      cardY.set(resistedY);
+
+      // Past threshold? Eject.
+      if (pullAccumRef.current * pullResistance >= ejectionThreshold) {
+        ejectCard();
+      }
+
+      return true;
+    },
+    [isEjecting, cardY, ejectCard]
+  );
+
+  // ─── Touch events ─────────────────────────────────────────────────
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
-    let wheelEndTimer: ReturnType<typeof setTimeout> | null = null;
+    const onTouchStart = (e: TouchEvent) => {
+      lastTouchYRef.current = e.touches[0].clientY;
+      checkBottom();
+      // Unlock pull if this NEW gesture starts while already at bottom
+      if (isAtBottomRef.current) {
+        pullUnlockedRef.current = true;
+      }
+    };
 
-    const handleWheel = (e: WheelEvent) => {
+    const onTouchMove = (e: TouchEvent) => {
+      if (isEjecting) return;
+      const currentY = e.touches[0].clientY;
+      const delta = lastTouchYRef.current - currentY; // positive = scrolling down
+      lastTouchYRef.current = currentY;
+
+      // Re-check bottom on every move
+      checkBottom();
+
+      if (isPullingRef.current || (isAtBottomRef.current && delta > 0)) {
+        if (delta < 0 && isPullingRef.current) {
+          // Reversing while pulling — reduce accumulator
+          pullAccumRef.current = Math.max(0, pullAccumRef.current + delta);
+          if (pullAccumRef.current <= 0) {
+            snapBack();
+            return;
+          }
+          const resistedY = -(pullAccumRef.current * pullResistance);
+          cardY.set(resistedY);
+          return;
+        }
+
+        if (applyPull(delta)) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    const onTouchEnd = () => {
+      if (isEjecting) return;
+      if (isPullingRef.current) {
+        const resistedDistance = pullAccumRef.current * pullResistance;
+        if (resistedDistance >= ejectionThreshold) {
+          ejectCard();
+        } else {
+          snapBack();
+        }
+      }
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [isEjecting, cardY, checkBottom, applyPull, snapBack, ejectCard]);
+
+  // ─── Wheel events (desktop trackpad) ──────────────────────────────
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    let settleTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const onWheel = (e: WheelEvent) => {
       if (isEjecting) return;
 
-      // Clear any pending snap-back
-      if (wheelEndTimer) clearTimeout(wheelEndTimer);
+      // Check bottom after current scroll frame
+      checkBottom();
 
-      if (applyOverscroll(e.deltaY)) {
+      // If at bottom but not yet unlocked, consume downward scroll and wait for settle
+      if (isAtBottomRef.current && !pullUnlockedRef.current && e.deltaY > 0) {
         e.preventDefault();
+        // After wheel momentum stops (200ms), unlock for next scroll
+        if (settleTimer) clearTimeout(settleTimer);
+        settleTimer = setTimeout(() => {
+          if (isAtBottomRef.current) {
+            pullUnlockedRef.current = true;
+          }
+        }, 100);
+        return;
       }
 
-      // After wheel stops (150ms idle), snap back if below threshold
-      if (isOverscrolling.current) {
-        wheelEndTimer = setTimeout(() => {
-          if (!isEjecting && isOverscrolling.current && overscrollAccum.current < releaseThreshold) {
+      // Use rAF to re-check after browser applies scroll
+      if (!isAtBottomRef.current && !isPullingRef.current) {
+        requestAnimationFrame(() => checkBottom());
+        return;
+      }
+
+      if (e.deltaY <= 0) {
+        // Scrolling up — if we're pulling, reverse
+        if (isPullingRef.current) {
+          pullAccumRef.current = Math.max(0, pullAccumRef.current + e.deltaY);
+          if (pullAccumRef.current <= 0) {
             snapBack();
+            return;
+          }
+          const resistedY = -(pullAccumRef.current * pullResistance);
+          cardY.set(resistedY);
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // Scrolling down at bottom — apply rubber band
+      if (applyPull(e.deltaY)) {
+        e.preventDefault();
+
+        // Debounced release: if wheel stops, evaluate threshold
+        if (wheelTimerRef.current) clearTimeout(wheelTimerRef.current);
+        wheelTimerRef.current = setTimeout(() => {
+          if (isEjecting) return;
+          if (isPullingRef.current) {
+            const resistedDistance = pullAccumRef.current * pullResistance;
+            if (resistedDistance >= ejectionThreshold) {
+              ejectCard();
+            } else {
+              snapBack();
+            }
           }
         }, 150);
       }
     };
 
-    el.addEventListener("wheel", handleWheel, { passive: false });
+    el.addEventListener("wheel", onWheel, { passive: false });
     return () => {
-      el.removeEventListener("wheel", handleWheel);
-      if (wheelEndTimer) clearTimeout(wheelEndTimer);
+      el.removeEventListener("wheel", onWheel);
+      if (wheelTimerRef.current) clearTimeout(wheelTimerRef.current);
+      if (settleTimer) clearTimeout(settleTimer);
     };
-  }, [applyOverscroll, isEjecting, snapBack]);
-
-  // Touch: overscroll ejection at bottom
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      lastTouchY.current = e.touches[0].clientY;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (isEjecting) return;
-      const currentY = e.touches[0].clientY;
-      const delta = lastTouchY.current - currentY; // positive = scrolling down
-      lastTouchY.current = currentY;
-      applyOverscroll(delta);
-    };
-
-    const handleTouchEnd = () => {
-      if (isEjecting) return;
-      if (isOverscrolling.current && overscrollAccum.current < releaseThreshold) {
-        snapBack();
-      }
-    };
-
-    el.addEventListener("touchstart", handleTouchStart, { passive: true });
-    el.addEventListener("touchmove", handleTouchMove, { passive: true });
-    el.addEventListener("touchend", handleTouchEnd, { passive: true });
-    return () => {
-      el.removeEventListener("touchstart", handleTouchStart);
-      el.removeEventListener("touchmove", handleTouchMove);
-      el.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [applyOverscroll, snapBack, isEjecting]);
+  }, [isEjecting, cardY, checkBottom, applyPull, snapBack, ejectCard]);
 
   return (
     <AnimatePresence onExitComplete={onClose}>
       {isOpen && (
         <>
-          {/* Overlay — solid dark */}
+          {/* Backdrop blur layer */}
           <motion.div
-            key="overlay-bg"
+            key="overlay-blur"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-stone-900/30 backdrop-blur-md"
-            onClick={handleClose}
+            className="fixed inset-0 z-50 backdrop-blur-md"
+            onClick={() => setIsOpen(false)}
+          />
+          {/* Backdrop tint layer */}
+          <motion.div
+            key="overlay-tint"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 bg-stone-900/30"
+            style={{ opacity: backdropOpacity }}
+            onClick={() => setIsOpen(false)}
           />
 
-          {/* Sheet wrapper — handles pull-down drag from top */}
-          <motion.div
-            key="overlay-sheet"
-            initial={{ y: "100%" }}
-            animate={{ y: "0%" }}
-            exit={{ y: "100%" }}
-            transition={{
-              duration: 0.2,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            drag={canDragDown ? "y" : false}
-            dragDirectionLock
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={0.08}
-            dragTransition={{
-              bounceStiffness: 800,
-              bounceDamping: 40,
-            }}
-            onDragEnd={(_, info) => {
-              if (info.offset.y > 150) {
-                handleClose();
-              }
-            }}
-            className="fixed inset-x-0 top-20 bottom-4 left-4 right-4 z-50"
-          >
-            {/* Inner sheet — moves with overscroll ejection */}
+          {/* Physics wrapper — the card */}
+          <div className="fixed inset-x-0 top-20 bottom-4 left-4 right-4 z-50 pointer-events-none">
             <motion.div
-              style={{ y: sheetY, opacity: sheetOpacity }}
-              className="absolute inset-0 bg-white rounded-3xl shadow-lift flex flex-col overflow-hidden"
+              key="overlay-card"
+              initial={{ y: "100vh" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100vh" }}
+              transition={{
+                type: "spring",
+                damping: 30,
+                stiffness: 300,
+                mass: 0.8,
+              }}
+              style={{ y: cardY }}
+              className="h-full bg-white rounded-3xl shadow-lift flex flex-col overflow-hidden pointer-events-auto"
             >
-              {/* Scrollable content */}
+              {/* Content container — native scroll */}
               <div
                 ref={scrollRef}
-                onScroll={handleScrollForDrag}
+                onScroll={checkBottom}
                 className="flex-1 overflow-y-auto overscroll-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               >
                 <div className="px-6 pt-6 pb-6">
@@ -309,33 +387,23 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
                 </div>
               </div>
 
-              {/* Drag handle — bottom: pull up to fade & close */}
-              <div
-                onClick={handleClose}
-                onTouchStart={(e) => {
-                  lastTouchY.current = e.touches[0].clientY;
-                }}
-                onTouchMove={(e) => {
-                  const pulled = lastTouchY.current - e.touches[0].clientY;
-                  if (pulled > 0) {
-                    const fade = Math.max(0, 1 - pulled / 180);
-                    sheetOpacity.set(fade);
-                  }
-                }}
-                onTouchEnd={(e) => {
-                  const pulled = lastTouchY.current - e.changedTouches[0].clientY;
-                  if (pulled > 180) {
-                    eject();
-                  } else {
-                    animate(sheetOpacity, 1, { duration: 0.15 });
-                  }
-                }}
-                className="flex justify-center py-4 cursor-pointer"
-              >
-                <div className="w-10 h-1 bg-stone-300 rounded-full" />
-              </div>
+              {/* Close button — appears after scrolling */}
+              <AnimatePresence>
+                {showClose && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={() => setIsOpen(false)}
+                    className="flex justify-center py-3 cursor-pointer bg-stone-50/80 backdrop-blur-sm"
+                  >
+                    <span className="font-jakarta text-[9px] text-stone-500 uppercase tracking-wider">закрити</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
-          </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
