@@ -7,6 +7,7 @@ export function useProducts(params?: {
   page?: number;
   size?: number;
   search?: string;
+  sort?: string;
 }) {
   return useQuery({
     queryKey: ["products", params],

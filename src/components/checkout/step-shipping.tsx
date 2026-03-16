@@ -198,8 +198,8 @@ export function StepShipping({
                 value={formData.warehouseRef}
                 onChange={handleWarehouseSelect}
                 className={`
-                  w-full border border-stone-200 rounded-xl py-3 px-4 bg-transparent outline-none
-                  appearance-none cursor-pointer
+                  w-full border border-stone-200 rounded-xl py-3 px-4 bg-white outline-none
+                  cursor-pointer
                   focus:border-coral focus:ring-2 focus:ring-coral/20
                   transition-all duration-200
                   ${errors.warehouseRef ? "border-coral" : ""}

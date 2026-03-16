@@ -5,7 +5,6 @@ import {
   motion,
   AnimatePresence,
   useMotionValue,
-  useTransform,
   animate,
 } from "framer-motion";
 import Image from "next/image";
@@ -48,7 +47,7 @@ function OverlayCarousel({
   }
 
   return (
-    <div className="relative aspect-[4/5] w-full overflow-hidden bg-stone-100">
+    <div className="relative aspect-[4/5] w-full overflow-hidden bg-stone-100 rounded-2xl">
       <div
         ref={scrollRef}
         onScroll={handleScroll}
@@ -88,8 +87,6 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
 
   // Physics wrapper Y — the "rubber band" axis
   const cardY = useMotionValue(0);
-  // Backdrop opacity fades as card is pulled
-  const backdropOpacity = useTransform(cardY, [-120, 0], [0.5, 1]);
 
   // Rubber band state
   const isAtBottomRef = useRef(false);
@@ -115,6 +112,8 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
   }, []);
 
   // ─── Scroll edge detection ────────────────────────────────────────
+  const wasAtBottomRef = useRef(false);
+
   const checkBottom = useCallback(() => {
     if (!scrollRef.current) return;
     const el = scrollRef.current;
@@ -128,7 +127,22 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
     if (el.scrollTop > 100 && !showClose) {
       setShowClose(true);
     }
-  }, [showClose]);
+    // Bounce when first hitting bottom
+    if (atBottom && !wasAtBottomRef.current && !isPullingRef.current) {
+      animate(cardY, -12, {
+        type: "spring",
+        stiffness: 600,
+        damping: 15,
+      }).then(() => {
+        animate(cardY, 0, {
+          type: "spring",
+          stiffness: 500,
+          damping: 30,
+        });
+      });
+    }
+    wasAtBottomRef.current = atBottom;
+  }, [showClose, cardY]);
 
   // ─── Ejection: card flies up off screen ───────────────────────────
   const ejectCard = useCallback(() => {
@@ -325,7 +339,7 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.2, exit: { duration: 0.5, ease: "easeOut" } }}
             className="fixed inset-0 z-50 backdrop-blur-md"
             onClick={() => setIsOpen(false)}
           />
@@ -335,9 +349,8 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.2, exit: { duration: 0.5, ease: "easeOut" } }}
             className="fixed inset-0 z-50 bg-stone-900/30"
-            style={{ opacity: backdropOpacity }}
             onClick={() => setIsOpen(false)}
           />
 

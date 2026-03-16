@@ -7,7 +7,7 @@ import { ProductGrid, ProductGridItem } from "@/components/product/product-grid"
 import { ProductOverlay } from "@/components/product/product-overlay";
 
 export function ProductFeed() {
-  const { data, isLoading, error } = useProducts({ size: 20 });
+  const { data, isLoading, error } = useProducts({ size: 20, sort: "createdAt,desc" });
   const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
 
   if (isLoading) {
