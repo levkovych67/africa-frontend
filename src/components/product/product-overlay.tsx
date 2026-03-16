@@ -357,65 +357,69 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Scrollable wrapper — scrolls the card itself */}
-          <div
-            ref={scrollRef}
-            onScroll={checkBottom}
-            className="fixed inset-x-0 top-20 bottom-0 z-50 overflow-y-auto overscroll-none pointer-events-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          {/* Entrance/exit animation wrapper — no overflow */}
+          <motion.div
+            key="overlay-entrance"
+            initial={{ y: "100vh" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100vh" }}
+            transition={{
+              type: "spring",
+              damping: 30,
+              stiffness: 300,
+              mass: 0.8,
+            }}
+            className="fixed inset-x-0 top-20 bottom-0 z-50"
           >
-            <div className="px-4 pb-4">
-              <motion.div
-                key="overlay-card"
-                initial={{ y: "100vh" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100vh" }}
-                transition={{
-                  type: "spring",
-                  damping: 30,
-                  stiffness: 300,
-                  mass: 0.8,
-                }}
-                style={{ y: cardY }}
-                className="bg-white rounded-3xl shadow-lift"
-              >
-                <div className="px-6 pt-6 pb-6">
-                  {isLoading || !product ? (
-                    <div className="space-y-4">
-                      <div className="aspect-[4/5] bg-stone-100 animate-pulse" />
-                      <div className="h-6 w-3/4 bg-stone-100 animate-pulse" />
-                      <div className="h-5 w-1/4 bg-stone-100 animate-pulse" />
-                      <div className="grid grid-cols-4 gap-2">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="h-12 bg-stone-100 animate-pulse" />
-                        ))}
+            {/* Scrollable wrapper — scrolls the card + rubber band */}
+            <motion.div
+              ref={scrollRef}
+              onScroll={checkBottom}
+              style={{ y: cardY }}
+              className="h-full overflow-y-auto overscroll-none pointer-events-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              <div className="px-4 pb-4">
+                {/* Card — pure visual, no transforms */}
+                <div className="bg-white rounded-3xl shadow-lift">
+                  <div className="px-6 pt-6 pb-6">
+                    {isLoading || !product ? (
+                      <div className="space-y-4">
+                        <div className="aspect-[4/5] bg-stone-100 animate-pulse" />
+                        <div className="h-6 w-3/4 bg-stone-100 animate-pulse" />
+                        <div className="h-5 w-1/4 bg-stone-100 animate-pulse" />
+                        <div className="grid grid-cols-4 gap-2">
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="h-12 bg-stone-100 animate-pulse" />
+                          ))}
+                        </div>
+                        <div className="h-12 bg-stone-100 animate-pulse" />
                       </div>
-                      <div className="h-12 bg-stone-100 animate-pulse" />
+                    ) : (
+                      <>
+                        <OverlayCarousel images={product.images} title={product.title} />
+                        <div className="mt-4">
+                          <CommandCenter product={product} compact />
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Close button — appears after scrolling */}
+                  {showClose && (
+                    <div
+                      onClick={() => setIsOpen(false)}
+                      className="flex justify-center py-3 cursor-pointer bg-stone-50/80 backdrop-blur-sm"
+                    >
+                      <span className="font-jakarta text-[9px] text-stone-500 uppercase tracking-wider">закрити</span>
                     </div>
-                  ) : (
-                    <>
-                      <OverlayCarousel images={product.images} title={product.title} />
-                      <div className="mt-4">
-                        <CommandCenter product={product} compact />
-                      </div>
-                    </>
                   )}
                 </div>
+              </div>
 
-                {/* Close button — appears after scrolling */}
-                {showClose && (
-                  <div
-                    onClick={() => setIsOpen(false)}
-                    className="flex justify-center py-3 cursor-pointer bg-stone-50/80 backdrop-blur-sm"
-                  >
-                    <span className="font-jakarta text-[9px] text-stone-500 uppercase tracking-wider">закрити</span>
-                  </div>
-                )}
-              </motion.div>
-            </div>
-
-            {/* Extra space below card for rubber-band overscroll */}
-            <div className="h-32" />
-          </div>
+              {/* Extra space below card for rubber-band overscroll */}
+              <div className="h-32" />
+            </motion.div>
+          </motion.div>
         </>
       )}
     </AnimatePresence>
