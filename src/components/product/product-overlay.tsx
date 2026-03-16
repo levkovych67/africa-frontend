@@ -363,7 +363,7 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
             onScroll={checkBottom}
             className="fixed inset-x-0 top-20 bottom-0 z-50 overflow-y-auto overscroll-none pointer-events-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            <div className="px-4 pb-4 min-h-full">
+            <div className="px-4 pb-4">
               <motion.div
                 key="overlay-card"
                 initial={{ y: "100vh" }}
@@ -376,7 +376,7 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
                   mass: 0.8,
                 }}
                 style={{ y: cardY }}
-                className="bg-white rounded-3xl shadow-lift overflow-hidden"
+                className="bg-white rounded-3xl shadow-lift"
               >
                 <div className="px-6 pt-6 pb-6">
                   {isLoading || !product ? (

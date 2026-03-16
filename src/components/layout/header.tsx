@@ -3,14 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useAnimationControls } from "framer-motion";
 import { useCartStore } from "@/store/cart";
 
 export function Header() {
   const { isOpen, openCart, closeCart, totalItems, items } = useCartStore();
   const [mounted, setMounted] = useState(false);
+  const [isPulsing, setIsPulsing] = useState(false);
   const prevItemCount = useRef(0);
-  const controls = useAnimationControls();
 
   useEffect(() => {
     setMounted(true);
@@ -23,14 +22,19 @@ export function Header() {
   useEffect(() => {
     if (!mounted) return;
     if (totalQty > prevItemCount.current) {
-      controls.start({
-        scale: [1, 1.2, 1],
-        opacity: [1, 0.7, 1],
-        transition: { duration: 0.4, ease: "easeOut" },
-      });
+      setIsPulsing(true);
+      const timer = setTimeout(() => setIsPulsing(false), 400);
+      return () => clearTimeout(timer);
     }
     prevItemCount.current = totalQty;
-  }, [totalQty, mounted, controls]);
+  }, [totalQty, mounted]);
+
+  // Update ref outside the cleanup path
+  useEffect(() => {
+    if (mounted) {
+      prevItemCount.current = totalQty;
+    }
+  }, [totalQty, mounted]);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/70 backdrop-blur-md h-16 px-6 md:px-12 flex justify-between items-center border-b border-stone-200/30">
@@ -44,14 +48,15 @@ export function Header() {
           priority
         />
       </Link>
-      <motion.button
+      <button
         type="button"
         onClick={isOpen ? closeCart : openCart}
-        animate={controls}
-        className="font-jakarta font-bold text-xs uppercase tracking-wider"
+        className={`font-jakarta font-bold text-xs uppercase tracking-wider transition-transform duration-400 ${
+          isPulsing ? "animate-cart-pulse" : ""
+        }`}
       >
         Кошик{count > 0 && <span className="font-grotesk"> ({count})</span>}
-      </motion.button>
+      </button>
     </header>
   );
 }

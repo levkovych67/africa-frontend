@@ -9,3 +9,13 @@ body {
   background-color: #FDFCFB;
   color: #1C1917;
 }
+
+@keyframes cart-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  40% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-cart-pulse {
+  animation: cart-pulse 0.4s ease-out;
+}
