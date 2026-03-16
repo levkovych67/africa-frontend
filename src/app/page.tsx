@@ -10,12 +10,12 @@ export default function Home() {
     <>
       <Header />
       <CartDrawer />
+      <HeroSection />
       <PageTransition>
-        <main className="snap-y snap-mandatory">
-          <section className="snap-start">
-            <HeroSection />
-          </section>
-          <section className="relative z-10 py-8 snap-start">
+        <main>
+          {/* Spacer to push content below the hero */}
+          <div className="h-screen" />
+          <section className="relative z-10 py-8">
             <ProductFeed />
           </section>
           <Footer />

@@ -369,7 +369,7 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
               stiffness: 300,
               mass: 0.8,
             }}
-            className="fixed inset-x-0 top-20 bottom-0 z-50"
+            className="fixed inset-x-0 top-16 bottom-0 z-50"
           >
             {/* Scrollable wrapper — scrolls the card + rubber band */}
             <motion.div
@@ -378,6 +378,8 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
               style={{ y: cardY }}
               className="h-full overflow-y-auto overscroll-none pointer-events-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
+              {/* Top spacer — scrolls away so card becomes flush with navbar */}
+              <div className="h-4" />
               <div className="px-4 pb-4">
                 {/* Card — pure visual, no transforms */}
                 <div className="bg-white rounded-3xl shadow-lift">

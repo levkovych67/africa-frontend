@@ -11,7 +11,7 @@ export function HeroSection() {
   const filterBlur = useTransform(blur, (v) => `blur(${v}px)`);
 
   return (
-    <section className="sticky top-0 z-0 h-screen w-full">
+    <section className="fixed inset-0 z-0 h-screen w-full">
       <motion.div
         className="absolute inset-0"
         style={{ filter: filterBlur, opacity }}
