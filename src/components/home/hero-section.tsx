@@ -28,6 +28,7 @@ export function HeroSection() {
           src="/images/phone.png"
           alt="КОЛЕКЦІЯ 2026"
           fill
+          loading="eager"
           sizes="(max-width: 768px) 100vw, 0vw"
           className="block md:hidden object-cover"
         />

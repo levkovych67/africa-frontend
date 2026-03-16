@@ -129,15 +129,18 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
     }
     // Bounce when first hitting bottom
     if (atBottom && !wasAtBottomRef.current && !isPullingRef.current) {
-      animate(cardY, -12, {
-        type: "spring",
-        stiffness: 600,
-        damping: 15,
-      }).then(() => {
-        animate(cardY, 0, {
+      cardY.set(0);
+      requestAnimationFrame(() => {
+        animate(cardY, -12, {
           type: "spring",
-          stiffness: 500,
-          damping: 30,
+          stiffness: 600,
+          damping: 15,
+        }).then(() => {
+          animate(cardY, 0, {
+            type: "spring",
+            stiffness: 500,
+            damping: 30,
+          });
         });
       });
     }
