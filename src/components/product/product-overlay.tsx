@@ -100,7 +100,7 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
   // iOS resistance — progressively harder to pull
   const pullResistance = 0.35;
   // Ejection threshold in card-pixels (not scroll-pixels)
-  const ejectionThreshold = 120;
+  const ejectionThreshold = 70;
 
   const wheelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

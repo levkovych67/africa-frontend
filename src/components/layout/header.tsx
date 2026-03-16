@@ -18,12 +18,11 @@ export function Header() {
 
   const count = mounted ? totalItems() : 0;
 
-  // Pulse when items change (added to cart)
+  // Pulse when total quantity increases
+  const totalQty = items.reduce((sum, i) => sum + i.quantity, 0);
   useEffect(() => {
     if (!mounted) return;
-    const currentCount = items.length;
-    if (currentCount > prevItemCount.current && buttonRef.current) {
-      // Scale up then back
+    if (totalQty > prevItemCount.current && buttonRef.current) {
       animate(buttonRef.current, {
         scale: [1, 1.2, 1],
         opacity: [1, 0.7, 1],
@@ -32,8 +31,8 @@ export function Header() {
         ease: "easeOut",
       });
     }
-    prevItemCount.current = currentCount;
-  }, [items, mounted]);
+    prevItemCount.current = totalQty;
+  }, [totalQty, mounted]);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/70 backdrop-blur-md h-16 px-6 md:px-12 flex justify-between items-center border-b border-stone-200/30">
