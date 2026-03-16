@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 export function ScrollSnap({ targetRef }: { targetRef: React.RefObject<HTMLElement | null> }) {
   const hasSnapped = useRef(false);
-  const navbarHeight = 80; // top-20 = 5rem = 80px
+  const navbarHeight = 64; // h-16 = 4rem = 64px
 
   useEffect(() => {
     const handleScroll = () => {

@@ -19,6 +19,8 @@ jobs:
             git pull origin main
             npm ci
             NEXT_PUBLIC_API_URL=http://${{ secrets.VPS_HOST }} npm run build
-            cp -r .next/static .next/standalone/.next/static
-            cp -r public .next/standalone/public
+            rm -rf .next/standalone/.next/static
+            cp -r .next/static .next/standalone/.next/
+            rm -rf .next/standalone/public
+            cp -r public .next/standalone/
             sudo systemctl restart africa-frontend
