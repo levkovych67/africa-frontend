@@ -1,0 +1,30 @@
+"use client";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getAdminOrders, updateOrderStatus } from "@/lib/api/admin-orders";
+import { OrderStatus } from "@/types/admin";
+
+export function useAdminOrders(params?: {
+  search?: string;
+  status?: OrderStatus;
+  page?: number;
+  size?: number;
+  sort?: string;
+}) {
+  return useQuery({
+    queryKey: ["admin-orders", params],
+    queryFn: () => getAdminOrders(params),
+  });
+}
+
+export function useUpdateOrderStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
+      updateOrderStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+    },
+  });
+}

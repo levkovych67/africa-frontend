@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useCartStore } from "@/store/cart";
 
 export function Header() {
-  const { openCart, totalItems } = useCartStore();
+  const { isOpen, openCart, closeCart, totalItems } = useCartStore();
   const count = totalItems();
 
   return (
@@ -22,7 +22,7 @@ export function Header() {
       </Link>
       <button
         type="button"
-        onClick={openCart}
+        onClick={isOpen ? closeCart : openCart}
         className="font-jakarta font-bold text-xs uppercase tracking-wider"
       >
         Кошик{count > 0 && ` (${count})`}

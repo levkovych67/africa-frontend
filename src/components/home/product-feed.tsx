@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useProducts } from "@/hooks/use-products";
 import { ProductCard } from "@/components/product/product-card";
 import { ProductGrid, ProductGridItem } from "@/components/product/product-grid";
+import { ProductOverlay } from "@/components/product/product-overlay";
 
 export function ProductFeed() {
   const { data, isLoading, error } = useProducts({ size: 20 });
+  const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -45,12 +48,25 @@ export function ProductFeed() {
   }
 
   return (
-    <ProductGrid>
-      {products.map((product, i) => (
-        <ProductGridItem key={product.id}>
-          <ProductCard product={product} priority={i < 4} />
-        </ProductGridItem>
-      ))}
-    </ProductGrid>
+    <>
+      <ProductGrid>
+        {products.map((product, i) => (
+          <ProductGridItem key={product.id}>
+            <ProductCard
+              product={product}
+              priority={false}
+              onExpand={setExpandedSlug}
+            />
+          </ProductGridItem>
+        ))}
+      </ProductGrid>
+
+      {expandedSlug && (
+        <ProductOverlay
+          slug={expandedSlug}
+          onClose={() => setExpandedSlug(null)}
+        />
+      )}
+    </>
   );
 }

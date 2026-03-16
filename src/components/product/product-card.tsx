@@ -13,9 +13,10 @@ function isImageUrl(url: string): boolean {
 interface ProductCardProps {
   product: Product;
   priority?: boolean;
+  onExpand?: (slug: string) => void;
 }
 
-export function ProductCard({ product, priority = false }: ProductCardProps) {
+export function ProductCard({ product, priority = false, onExpand }: ProductCardProps) {
   const images = product.images.filter(isImageUrl);
   const [activeIndex, setActiveIndex] = useState(0);
   const [hasHovered, setHasHovered] = useState(false);
@@ -54,6 +55,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   if (images.length === 0) {
     return (
       <div className="rounded-2xl overflow-hidden shadow-soft">
+
         <div className="aspect-[4/5] bg-stone-100/50 flex items-center justify-center">
           <span className="font-grotesk text-xs text-stone-400">Немає фото</span>
         </div>
@@ -70,6 +72,12 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   return (
     <Link
       href={`/product/${product.slug}`}
+      onClick={(e) => {
+        if (onExpand) {
+          e.preventDefault();
+          onExpand(product.slug);
+        }
+      }}
       className="group block rounded-2xl overflow-hidden shadow-soft hover:-translate-y-1 hover:shadow-lift transition-all duration-300"
     >
       {/* Desktop: hover zone carousel */}

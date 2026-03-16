@@ -21,14 +21,14 @@ export function HeroSection() {
           alt="КОЛЕКЦІЯ 2026"
           fill
           priority
-          sizes="100vw"
+          sizes="(max-width: 768px) 0vw, 100vw"
           className="hidden md:block object-cover"
         />
         <Image
           src="/images/phone.png"
           alt="КОЛЕКЦІЯ 2026"
           fill
-          sizes="100vw"
+          sizes="(max-width: 768px) 100vw, 0vw"
           className="block md:hidden object-cover"
         />
         <div className="absolute inset-0 z-10 flex items-center justify-center">

@@ -17,9 +17,14 @@ export function CheckoutSuccess({ orderId }: CheckoutSuccessProps) {
       <p className="font-grotesk text-sm text-stone-500 mb-8">
         Номер замовлення: {orderId}
       </p>
-      <Link href="/">
-        <PrecisionButton>Повернутися до магазину</PrecisionButton>
-      </Link>
+      <div className="flex flex-col gap-3 items-center">
+        <Link href={`/order/${orderId}`}>
+          <PrecisionButton>Відстежити замовлення</PrecisionButton>
+        </Link>
+        <Link href="/" className="text-sm text-stone-500 hover:text-stone-900">
+          Повернутися до магазину
+        </Link>
+      </div>
     </div>
   );
 }

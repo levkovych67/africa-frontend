@@ -9,3 +9,7 @@ export async function submitCheckout(
     body: JSON.stringify(payload),
   });
 }
+
+export async function getOrder(id: string): Promise<OrderResponse> {
+  return apiClient<OrderResponse>(`/api/v1/orders/${id}`);
+}

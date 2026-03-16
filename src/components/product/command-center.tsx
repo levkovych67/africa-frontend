@@ -8,13 +8,14 @@ import { findVariant } from "@/lib/utils/variant";
 import { formatPrice } from "@/lib/utils/price";
 import { PrecisionButton } from "@/components/ui/precision-button";
 import { SizeSelector } from "@/components/ui/size-selector";
-import { Accordion } from "@/components/ui/accordion";
+
 
 interface CommandCenterProps {
   product: Product;
+  compact?: boolean;
 }
 
-export function CommandCenter({ product }: CommandCenterProps) {
+export function CommandCenter({ product, compact = false }: CommandCenterProps) {
   const [selectedAttributes, setSelectedAttributes] = useState<
     Record<string, string>
   >({});
@@ -50,13 +51,12 @@ export function CommandCenter({ product }: CommandCenterProps) {
       image: product.images[0] || "",
     });
 
-    openCart();
   };
 
   const allVariantsOutOfStock = product.variants.every((v) => v.stock === 0);
 
   return (
-    <div className="sticky top-8 p-6 lg:p-8">
+    <div className={compact ? "" : "sticky top-8 p-6 lg:p-8"}>
       <h1 className="text-h2-section font-jakarta font-bold">
         {product.title}
       </h1>
@@ -106,19 +106,15 @@ export function CommandCenter({ product }: CommandCenterProps) {
         </PrecisionButton>
       </div>
 
-      <div className="mt-8">
-        <Accordion title="Опис" defaultOpen>
-          <p>{product.description || "Опис незабаром буде додано."}</p>
-        </Accordion>
-        <Accordion title="Склад">
-          <p>Інформація про склад буде додана пізніше.</p>
-        </Accordion>
-        <Accordion title="Доставка">
-          <p>
-            Доставка по Україні — Нова Пошта. Термін доставки 1-3 робочі дні.
-            Безкоштовна доставка при замовленні від 2000 UAH.
-          </p>
-        </Accordion>
+      <div className="mt-8 space-y-6">
+        <div>
+          <h3 className="font-jakarta font-bold text-xs uppercase tracking-wider mb-2">Опис</h3>
+          <p className="text-sm leading-relaxed">{product.description || "Опис незабаром буде додано."}</p>
+        </div>
+        <div>
+          <h3 className="font-jakarta font-bold text-xs uppercase tracking-wider mb-2">Склад</h3>
+          <p className="text-sm leading-relaxed">Інформація про склад буде додана пізніше.</p>
+        </div>
       </div>
     </div>
   );
