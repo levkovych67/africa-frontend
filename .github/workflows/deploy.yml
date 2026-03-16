@@ -16,7 +16,9 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd /opt/africa/africa-frontend
-            git pull origin main
+            git config --global --add safe.directory /opt/africa/africa-frontend
+            git fetch origin main
+            git reset --hard origin/main
             npm ci
             NEXT_PUBLIC_API_URL=http://${{ secrets.VPS_HOST }} npm run build
             rm -rf .next/standalone/.next/static
