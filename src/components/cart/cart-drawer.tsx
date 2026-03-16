@@ -19,7 +19,7 @@ function CartCard({ item, index }: { item: CartItem; index: number }) {
         type: "spring",
         stiffness: 300,
         damping: 30,
-        delay: index * 0.05,
+        delay: index < 4 ? index * 0.05 : 0,
       }}
       className="bg-white rounded-2xl shadow-soft p-4 flex gap-4"
     >
@@ -152,7 +152,7 @@ export function CartDrawer() {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
+                  transition={{ duration: 0.2 }}
                   className="bg-white rounded-2xl shadow-soft p-5 flex flex-col gap-4"
                 >
                   <div className="flex items-center justify-between">

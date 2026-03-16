@@ -53,7 +53,7 @@ export function Header() {
         onClick={isOpen ? closeCart : openCart}
         className="font-jakarta font-bold text-xs uppercase tracking-wider"
       >
-        Кошик{count > 0 && ` (${count})`}
+        Кошик{count > 0 && <span className="font-grotesk"> ({count})</span>}
       </motion.button>
     </header>
   );

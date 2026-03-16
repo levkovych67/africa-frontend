@@ -342,7 +342,7 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, exit: { duration: 0.5, ease: "easeOut" } }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="fixed inset-0 z-50 backdrop-blur-md"
             onClick={() => setIsOpen(false)}
           />
@@ -352,7 +352,7 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, exit: { duration: 0.5, ease: "easeOut" } }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="fixed inset-0 z-50 bg-stone-900/30"
             onClick={() => setIsOpen(false)}
           />

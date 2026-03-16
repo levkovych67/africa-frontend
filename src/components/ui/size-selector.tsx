@@ -30,8 +30,8 @@ export function SizeSelector({
               onClick={() => !isUnavailable && onSelect(value)}
               disabled={isUnavailable}
               className={`
-                rounded-xl border border-stone-200 py-3 text-center font-jakarta text-sm transition-all duration-200
-                ${isSelected ? "bg-coral text-white border-coral" : "bg-white text-stone-900 border-stone-200 hover:border-stone-400"}
+                rounded-xl border border-stone-200 py-3 text-center font-jakarta text-sm transition-all duration-200 active:scale-[0.97]
+                ${isSelected ? "bg-stone-900 text-white border-stone-900" : "bg-white text-stone-900 border-stone-200 hover:border-stone-400"}
                 ${isUnavailable ? "opacity-30 line-through cursor-not-allowed" : "cursor-pointer"}
               `}
             >

@@ -23,8 +23,8 @@ const config: Config = {
         grotesk: ["var(--font-space-grotesk)", "var(--font-inter)", "monospace"],
       },
       boxShadow: {
-        soft: "0 8px 30px rgba(28,25,23,0.05)",
-        lift: "0 20px 40px rgba(28,25,23,0.08)",
+        soft: "0 2px 8px rgba(28,25,23,0.04), 0 8px 24px rgba(28,25,23,0.04)",
+        lift: "0 4px 12px rgba(28,25,23,0.06), 0 12px 32px rgba(28,25,23,0.08)",
         glow: "0 0 20px rgba(255,90,95,0.15)",
       },
       letterSpacing: {
@@ -64,7 +64,7 @@ const config: Config = {
           "font-family": "var(--font-jakarta), var(--font-inter), sans-serif",
           "font-size": "0.75rem",
           "font-weight": "700",
-          "letter-spacing": "0.03em",
+          "letter-spacing": "0.05em",
           "text-transform": "uppercase",
         },
       });

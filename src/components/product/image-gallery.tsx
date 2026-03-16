@@ -48,8 +48,8 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
 
   if (filtered.length === 0) {
     return (
-      <div className="border border-black p-2 bg-white md:rounded-xl md:border-0 md:p-0 md:bg-stone-100 md:overflow-hidden">
-        <div className="aspect-[4/5] bg-stone-100 flex items-center justify-center">
+      <div className="bg-stone-100 md:rounded-xl overflow-hidden">
+        <div className="aspect-[4/5] flex items-center justify-center">
           <span className="text-sm text-stone-400">
             Немає зображень
           </span>
@@ -60,9 +60,9 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
 
   return (
     <div className="flex flex-col">
-      {/* Mobile: framed image carousel */}
-      <div className="relative border border-black p-2 bg-white md:hidden">
-        <div className="relative aspect-[4/5] w-full overflow-hidden">
+      {/* Mobile: full-bleed soft carousel */}
+      <div className="relative bg-stone-100 overflow-hidden md:hidden">
+        <div className="relative aspect-[4/5] w-full">
           <div
             ref={mobileScrollRef}
             onScroll={handleMobileScroll}
@@ -83,9 +83,9 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
             ))}
           </div>
 
-          {/* Counter badge — brutalist rectangle */}
+          {/* Counter badge */}
           {filtered.length > 1 && (
-            <div className="absolute bottom-2 right-2 z-10 bg-white border border-black px-2 py-1 font-grotesk text-[10px] tracking-widest">
+            <div className="absolute bottom-3 right-3 z-10 bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 font-grotesk text-xs">
               {activeIndex + 1} / {filtered.length}
             </div>
           )}

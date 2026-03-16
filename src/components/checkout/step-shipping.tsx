@@ -121,8 +121,8 @@ export function StepShipping({
 
   return (
     <div className="py-8">
-      <h2 className="font-jakarta font-bold text-xs uppercase tracking-wider mb-6">
-        2. Доставка
+      <h2 className="font-jakarta font-bold text-xs uppercase tracking-widest mb-6">
+        <span className="font-grotesk">02</span> / Доставка
       </h2>
       <div className="flex flex-col gap-4">
         {/* City search */}
@@ -141,7 +141,7 @@ export function StepShipping({
             placeholder="Почніть вводити назву міста"
             className={`
               w-full py-3 px-4 bg-white border border-stone-200 rounded-xl outline-none
-              focus:border-coral focus:ring-2 focus:ring-coral/20
+              focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10
               placeholder:text-stone-400 transition-all duration-200
               ${errors.cityRef ? "border-coral" : ""}
             `}
@@ -200,7 +200,7 @@ export function StepShipping({
                 className={`
                   w-full border border-stone-200 rounded-xl py-3 px-4 bg-white outline-none
                   cursor-pointer
-                  focus:border-coral focus:ring-2 focus:ring-coral/20
+                  focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10
                   transition-all duration-200
                   ${errors.warehouseRef ? "border-coral" : ""}
                 `}
@@ -235,7 +235,7 @@ export function StepShipping({
             rows={3}
             className="
               w-full bg-white border border-stone-200 rounded-xl py-3 px-4 outline-none
-              placeholder:text-stone-400 focus:border-coral focus:ring-2 focus:ring-coral/20
+              placeholder:text-stone-400 focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10
               transition-all duration-200 resize-none
             "
           />

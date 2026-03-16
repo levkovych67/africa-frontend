@@ -15,8 +15,8 @@ interface StepPaymentProps {
 export function StepPayment({ items, total, onSubmit, isLoading }: StepPaymentProps) {
   return (
     <div className="py-8">
-      <h2 className="font-jakarta font-bold text-xs uppercase tracking-wider mb-6">
-        3. Оплата
+      <h2 className="font-jakarta font-bold text-xs uppercase tracking-widest mb-6">
+        <span className="font-grotesk">03</span> / Оплата
       </h2>
 
       <OrderSummary items={items} />

@@ -34,7 +34,7 @@ export function ProductDetail({ slug }: ProductDetailProps) {
   }
 
   return (
-    <div className="grid grid-cols-12 gap-8 px-6 md:px-8">
+    <div className="mx-6 md:mx-8 bg-white rounded-3xl p-6 md:p-8 grid grid-cols-12 gap-8">
       <div className="col-span-12 lg:col-span-8">
         <ImageGallery images={product.images} title={product.title} />
       </div>
