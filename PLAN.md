@@ -28,9 +28,13 @@
 - [x] Анімації (Framer Motion)
  
 ---
-
+Email: wowlsdmaster@gmail.com
+  - Password: Admin123!
 ## Що треба зробити
-
+python3 -c "from pymongo import MongoClient; import bcrypt;
+uri=open('/opt/africa/africa-backend/.env.prod').read().split('MONGODB_URI=')[1].split('\n')[0]; client=MongoClient(uri);
+db=client.get_default_database(); h=bcrypt.hashpw(b'Admin123!', bcrypt.gensalt()).decode();
+db.admin_users.insert_one({'email':'wowlsdmaster@gmail.com','password':h,'role':'ADMIN'}); print('Admin created!')"
 ### Ф1. Фільтри товарів на каталозі
 
 **Нові файли:**
