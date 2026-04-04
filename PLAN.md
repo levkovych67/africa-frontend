@@ -27,7 +27,7 @@
 - [x] SEO metadata + OpenGraph (базовий)
 - [x] Анімації (Framer Motion)
  
----
+--- 
 Email: wowlsdmaster@gmail.com
   - Password: Admin123!
 ## Що треба зробити
