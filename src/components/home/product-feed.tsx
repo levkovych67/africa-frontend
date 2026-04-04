@@ -5,14 +5,8 @@ import { useProducts } from "@/hooks/use-products";
 import { ProductCard } from "@/components/product/product-card";
 import { ProductGrid, ProductGridItem } from "@/components/product/product-grid";
 import { ProductOverlay } from "@/components/product/product-overlay";
-import { ProductFilters, ActiveFilters, SortOption } from "@/components/product/product-filters";
+import { ProductFilters, ActiveFilters } from "@/components/product/product-filters";
 import { Product } from "@/types/product";
-
-const SORT_MAP: Record<SortOption, string> = {
-  newest: "createdAt,desc",
-  price_asc: "basePrice,asc",
-  price_desc: "basePrice,desc",
-};
 
 function filterByAttributes(
   products: Product[],
@@ -35,14 +29,13 @@ function filterByAttributes(
 export function ProductFeed() {
   const [filters, setFilters] = useState<ActiveFilters>({
     artistId: null,
-    sort: "newest",
     attributes: {},
   });
   const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
 
   const { data, isLoading, error } = useProducts({
     size: 100,
-    sort: SORT_MAP[filters.sort],
+    sort: "createdAt,desc",
     artistId: filters.artistId ?? undefined,
   });
 

@@ -5,19 +5,36 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useProductFilters } from "@/hooks/use-product-filters";
 import { ArtistFilter, ProductAttribute } from "@/types/product";
 
-export type SortOption = "newest" | "price_asc" | "price_desc";
-
 export interface ActiveFilters {
   artistId: string | null;
-  sort: SortOption;
   attributes: Record<string, string[]>;
 }
 
-const SORT_LABELS: Record<SortOption, string> = {
-  newest: "Новинки",
-  price_asc: "Дешевші",
-  price_desc: "Дорожчі",
+const SIZE_ORDER: Record<string, number> = {
+  XXS: 1, XS: 2, S: 3, M: 4, L: 5, XL: 6, XXL: 7, XXXL: 8,
 };
+
+function sortAttributeValues(values: string[]): string[] {
+  return [...values].sort((a, b) => {
+    const aUpper = a.toUpperCase();
+    const bUpper = b.toUpperCase();
+    // Both are letter sizes (S, M, L, etc.)
+    if (SIZE_ORDER[aUpper] && SIZE_ORDER[bUpper]) {
+      return SIZE_ORDER[aUpper] - SIZE_ORDER[bUpper];
+    }
+    // Try numeric/range comparison (e.g. "35-38", "43-46")
+    const aNum = parseFloat(a);
+    const bNum = parseFloat(b);
+    if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+    // Numbers before letters
+    if (!isNaN(aNum)) return -1;
+    if (!isNaN(bNum)) return 1;
+    // Letter sizes before unknown strings
+    if (SIZE_ORDER[aUpper]) return -1;
+    if (SIZE_ORDER[bUpper]) return 1;
+    return a.localeCompare(b);
+  });
+}
 
 interface ProductFiltersProps {
   filters: ActiveFilters;
@@ -115,19 +132,14 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
 
   const activeCount =
     (filters.artistId ? 1 : 0) +
-    (filters.sort !== "newest" ? 1 : 0) +
     Object.values(filters.attributes).reduce((n, v) => n + v.length, 0);
 
   const clearAll = () => {
-    onChange({ artistId: null, sort: "newest", attributes: {} });
+    onChange({ artistId: null, attributes: {} });
   };
 
   const setArtist = (id: string | null) => {
     onChange({ ...filters, artistId: id });
-  };
-
-  const setSort = (sort: SortOption) => {
-    onChange({ ...filters, sort });
   };
 
   const toggleAttribute = (type: string, value: string) => {
@@ -145,23 +157,9 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
 
   const filterContent = (inDrawer = false) => {
     const baseDelay = inDrawer ? 0.1 : 0;
-    let pillIndex = 0;
 
     return (
       <div className={`space-y-6 ${inDrawer ? "" : ""}`}>
-        {/* Sort */}
-        <FilterSection title="Сортування" delay={baseDelay}>
-          {(Object.keys(SORT_LABELS) as SortOption[]).map((key) => (
-            <FilterPill
-              key={key}
-              label={SORT_LABELS[key]}
-              active={filters.sort === key}
-              onClick={() => setSort(key)}
-              delay={baseDelay + (pillIndex++) * 0.03}
-            />
-          ))}
-        </FilterSection>
-
         {/* Artists */}
         {data?.artists && data.artists.length > 0 && (
           <FilterSection
@@ -198,7 +196,7 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
               title={attr.type}
               delay={baseDelay + 0.15 + sectionIndex * 0.06}
             >
-              {attr.values.map((value, i) => {
+              {sortAttributeValues(attr.values).map((value, i) => {
                 const isActive = (
                   filters.attributes[attr.type] || []
                 ).includes(value);
@@ -292,28 +290,6 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
           </AnimatePresence>
         </motion.button>
 
-        {/* Quick sort pills */}
-        <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {(Object.keys(SORT_LABELS) as SortOption[]).map((key) => (
-            <motion.button
-              key={key}
-              type="button"
-              onClick={() => setSort(key)}
-              whileTap={{ scale: 0.95 }}
-              className={`
-                shrink-0 px-3.5 py-2 rounded-full text-[11px] font-jakarta font-bold uppercase tracking-wider
-                transition-colors duration-200
-                ${
-                  filters.sort === key
-                    ? "bg-stone-900 text-white"
-                    : "bg-stone-100 text-stone-500"
-                }
-              `}
-            >
-              {SORT_LABELS[key]}
-            </motion.button>
-          ))}
-        </div>
       </div>
 
       {/* ─── Mobile drawer (bottom sheet) ──────────────────────────── */}
