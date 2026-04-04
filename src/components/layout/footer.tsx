@@ -62,7 +62,15 @@ export function Footer() {
             © 2026 AFRICA SHOP. Усі права захищені.
           </p>
           <p className="text-xs text-stone-500">
-            Україна
+            Створено командою{" "}
+            <a
+              href="https://galychyna.online/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-stone-400 hover:text-white transition-colors"
+            >
+              Galychyna Technologies
+            </a>
           </p>
         </div>
       </div>
