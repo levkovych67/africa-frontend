@@ -56,11 +56,13 @@ export interface OrderResponse {
   items: OrderItem[];
   totalAmount: number;
   status: string;
+  paymentMethod: PaymentMethod;
   shippingDetails: ShippingDetails & {
     trackingNumber: string | null;
     carrier: string | null;
   };
   comment: string | null;
+  accessToken?: string;
   createdAt: string;
   updatedAt: string | null;
 }
