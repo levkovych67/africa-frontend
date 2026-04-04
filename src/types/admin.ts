@@ -54,21 +54,19 @@ export interface AdminOrderItem {
 // Dashboard
 export interface TopProduct {
   productId: string;
-  title: string;
-  unitsSold: number;
-  revenue: number;
+  productTitle: string;
+  totalQuantity: number;
+  totalRevenue: number;
 }
 
 export interface RevenueByDay {
   date: string;
   revenue: number;
-  orders: number;
 }
 
 export interface DashboardStats {
   totalRevenue: number;
   totalOrders: number;
-  totalUnitsSold: number;
   topProducts: TopProduct[];
   revenueByDay: RevenueByDay[];
 }

@@ -51,7 +51,7 @@ export default function AdminDashboardPage() {
       {data && (
         <>
           {/* Stat cards */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <p className="text-sm text-gray-500">Дохід</p>
               <p className="text-2xl font-semibold text-gray-900 mt-1">
@@ -62,12 +62,6 @@ export default function AdminDashboardPage() {
               <p className="text-sm text-gray-500">Замовлення</p>
               <p className="text-2xl font-semibold text-gray-900 mt-1">
                 {data.totalOrders}
-              </p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <p className="text-sm text-gray-500">Продано одиниць</p>
-              <p className="text-2xl font-semibold text-gray-900 mt-1">
-                {data.totalUnitsSold}
               </p>
             </div>
           </div>
@@ -88,9 +82,6 @@ export default function AdminDashboardPage() {
                       <th className="text-right px-4 py-3 font-medium text-gray-500">
                         Дохід
                       </th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-500">
-                        Замовлення
-                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -104,9 +95,6 @@ export default function AdminDashboardPage() {
                         </td>
                         <td className="px-4 py-2 text-right text-gray-900">
                           {formatPrice(day.revenue)}
-                        </td>
-                        <td className="px-4 py-2 text-right text-gray-600">
-                          {day.orders}
                         </td>
                       </tr>
                     ))}
@@ -144,13 +132,13 @@ export default function AdminDashboardPage() {
                         className="border-b border-gray-100"
                       >
                         <td className="px-4 py-2 text-gray-900">
-                          {product.title}
+                          {product.productTitle}
                         </td>
                         <td className="px-4 py-2 text-right text-gray-600">
-                          {product.unitsSold}
+                          {product.totalQuantity}
                         </td>
                         <td className="px-4 py-2 text-right text-gray-900">
-                          {formatPrice(product.revenue)}
+                          {formatPrice(product.totalRevenue)}
                         </td>
                       </tr>
                     ))}
