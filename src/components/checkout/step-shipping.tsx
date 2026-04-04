@@ -81,7 +81,7 @@ export function StepShipping({
         })
       : warehouses;
     return {
-      filteredBranches: filtered.filter((wh) => wh.type === "warehouse"),
+      filteredBranches: filtered.filter((wh) => wh.type !== "postbox"),
       filteredPostboxes: filtered.filter((wh) => wh.type === "postbox"),
     };
   }, [warehouses, warehouseQuery]);
