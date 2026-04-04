@@ -6,6 +6,17 @@ import { ValidationErrors } from "@/lib/utils/validation";
 import type { FormData } from "./checkout-form";
 import type { NovaWarehouse } from "@/types/order";
 
+const POPULAR_CITIES = [
+  { ref: "8d5a980d-391c-11dd-90d9-001a92567626", name: "Київ", region: "Київська" },
+  { ref: "db5c88f5-391c-11dd-90d9-001a92567626", name: "Львів", region: "Львівська" },
+  { ref: "db5c88d0-391c-11dd-90d9-001a92567626", name: "Одеса", region: "Одеська" },
+  { ref: "db5c88de-391c-11dd-90d9-001a92567626", name: "Харків", region: "Харківська" },
+  { ref: "db5c88e0-391c-11dd-90d9-001a92567626", name: "Дніпро", region: "Дніпропетровська" },
+  { ref: "db5c890b-391c-11dd-90d9-001a92567626", name: "Запоріжжя", region: "Запорізька" },
+  { ref: "db5c8892-391c-11dd-90d9-001a92567626", name: "Вінниця", region: "Вінницька" },
+  { ref: "db5c88c6-391c-11dd-90d9-001a92567626", name: "Миколаїв", region: "Миколаївська" },
+];
+
 interface StepShippingProps {
   formData: FormData;
   setFormData: React.Dispatch<React.SetStateAction<FormData>>;
@@ -81,7 +92,7 @@ export function StepShipping({
         })
       : warehouses;
     return {
-      filteredBranches: filtered.filter((wh) => wh.type !== "postbox"),
+      filteredBranches: filtered.filter((wh) => wh.type === "warehouse"),
       filteredPostboxes: filtered.filter((wh) => wh.type === "postbox"),
     };
   }, [warehouses, warehouseQuery]);
@@ -193,8 +204,7 @@ export function StepShipping({
             value={cityQuery}
             onChange={(e) => handleCityInputChange(e.target.value)}
             onFocus={() => {
-              if (cityQuery.length >= 2 && !formData.cityRef)
-                setShowCityDropdown(true);
+              if (!formData.cityRef) setShowCityDropdown(true);
             }}
             placeholder="Почніть вводити назву міста"
             className={`
@@ -210,32 +220,53 @@ export function StepShipping({
             </span>
           )}
 
-          {showCityDropdown && debouncedQuery.length >= 2 && (
+          {showCityDropdown && (
             <div className="absolute z-20 left-0 right-0 top-full bg-white rounded-xl shadow-lift border border-stone-200/50 mt-1 overflow-hidden max-h-48 overflow-y-auto">
-              {citiesLoading ? (
-                <div className="px-4 py-3 text-xs text-stone-400">
-                  Пошук...
-                </div>
-              ) : cities && cities.length > 0 ? (
-                cities.map((city) => (
-                  <button
-                    key={city.ref}
-                    type="button"
-                    onClick={() => handleCitySelect(city.ref, city.name)}
-                    className="w-full text-left px-4 py-3 text-sm hover:bg-stone-50 border-b border-stone-100 last:border-b-0"
-                  >
-                    {city.name}
-                    {city.region && (
+              {debouncedQuery.length >= 2 ? (
+                citiesLoading ? (
+                  <div className="px-4 py-3 text-xs text-stone-400">
+                    Пошук...
+                  </div>
+                ) : cities && cities.length > 0 ? (
+                  cities.map((city) => (
+                    <button
+                      key={city.ref}
+                      type="button"
+                      onClick={() => handleCitySelect(city.ref, city.name)}
+                      className="w-full text-left px-4 py-3 text-sm hover:bg-stone-50 border-b border-stone-100 last:border-b-0"
+                    >
+                      {city.name}
+                      {city.region && (
+                        <span className="text-stone-400 ml-2">
+                          {city.region}
+                        </span>
+                      )}
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-xs text-stone-400">
+                    Нічого не знайдено
+                  </div>
+                )
+              ) : (
+                <>
+                  <div className="px-4 py-2 text-[10px] font-jakarta font-bold uppercase tracking-widest text-stone-400 bg-stone-50">
+                    Популярні міста
+                  </div>
+                  {POPULAR_CITIES.map((city) => (
+                    <button
+                      key={city.ref}
+                      type="button"
+                      onClick={() => handleCitySelect(city.ref, city.name)}
+                      className="w-full text-left px-4 py-3 text-sm hover:bg-stone-50 border-b border-stone-100 last:border-b-0"
+                    >
+                      {city.name}
                       <span className="text-stone-400 ml-2">
                         {city.region}
                       </span>
-                    )}
-                  </button>
-                ))
-              ) : (
-                <div className="px-4 py-3 text-xs text-stone-400">
-                  Нічого не знайдено
-                </div>
+                    </button>
+                  ))}
+                </>
               )}
             </div>
           )}
