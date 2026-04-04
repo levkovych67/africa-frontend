@@ -18,18 +18,14 @@ function sortAttributeValues(values: string[]): string[] {
   return [...values].sort((a, b) => {
     const aUpper = a.toUpperCase();
     const bUpper = b.toUpperCase();
-    // Both are letter sizes (S, M, L, etc.)
     if (SIZE_ORDER[aUpper] && SIZE_ORDER[bUpper]) {
       return SIZE_ORDER[aUpper] - SIZE_ORDER[bUpper];
     }
-    // Try numeric/range comparison (e.g. "35-38", "43-46")
     const aNum = parseFloat(a);
     const bNum = parseFloat(b);
     if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
-    // Numbers before letters
     if (!isNaN(aNum)) return -1;
     if (!isNaN(bNum)) return 1;
-    // Letter sizes before unknown strings
     if (SIZE_ORDER[aUpper]) return -1;
     if (SIZE_ORDER[bUpper]) return 1;
     return a.localeCompare(b);
@@ -41,7 +37,7 @@ interface ProductFiltersProps {
   onChange: (filters: ActiveFilters) => void;
 }
 
-/* ─── Pill chip with layout animation ─────────────────────────────── */
+/* ─── Pill chip — premium glass style ─────────────────────────────── */
 
 function FilterPill({
   label,
@@ -58,32 +54,44 @@ function FilterPill({
     <motion.button
       type="button"
       onClick={onClick}
-      initial={{ opacity: 0, scale: 0.85 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, scale: 0.85, y: 6 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{
         type: "spring",
         stiffness: 400,
         damping: 25,
         delay,
       }}
-      whileHover={{ scale: 1.05 }}
+      whileHover={{ scale: 1.06, y: -1 }}
       whileTap={{ scale: 0.95 }}
       className={`
-        px-4 py-2 rounded-full text-xs font-jakarta font-bold uppercase tracking-wider
-        transition-colors duration-200
+        relative px-4 py-2.5 rounded-xl text-[11px] font-jakarta font-bold uppercase tracking-[0.06em]
+        transition-all duration-300 ease-out cursor-pointer select-none
+        border backdrop-blur-sm
         ${
           active
-            ? "bg-stone-900 text-white shadow-soft"
-            : "bg-stone-100 text-stone-500 hover:bg-stone-200 hover:text-stone-700"
+            ? "bg-stone-900 text-white border-stone-900 shadow-[0_4px_16px_rgba(28,25,23,0.2)]"
+            : "bg-white/80 text-stone-600 border-stone-200/60 hover:bg-white hover:border-stone-300 hover:text-stone-800 hover:shadow-[0_2px_12px_rgba(28,25,23,0.06)]"
         }
       `}
     >
+      {/* Active indicator dot */}
+      <AnimatePresence>
+        {active && (
+          <motion.span
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-coral shadow-[0_0_8px_rgba(255,90,95,0.4)]"
+          />
+        )}
+      </AnimatePresence>
       {label}
     </motion.button>
   );
 }
 
-/* ─── Section with staggered children ─────────────────────────────── */
+/* ─── Section with title accent ─────────────────────────────── */
 
 function FilterSection({
   title,
@@ -104,11 +112,17 @@ function FilterSection({
         damping: 30,
         delay,
       }}
+      className="w-full"
     >
-      <h3 className="font-jakarta font-bold text-[10px] uppercase tracking-[0.08em] text-stone-400 mb-3">
-        {title}
-      </h3>
-      <div className="flex flex-wrap gap-2">{children}</div>
+      {/* Section title with decorative lines */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-stone-200/60" />
+        <h3 className="font-jakarta font-extrabold text-[10px] uppercase tracking-[0.12em] text-stone-400 whitespace-nowrap">
+          {title}
+        </h3>
+        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-stone-200/60" />
+      </div>
+      <div className="flex flex-wrap justify-center gap-2">{children}</div>
     </motion.div>
   );
 }
@@ -129,6 +143,10 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
       document.body.style.overflow = "";
     };
   }, [mobileOpen]);
+
+  const hasFilters =
+    (data?.artists && data.artists.length > 0) ||
+    (data?.attributes && data.attributes.length > 0);
 
   const activeCount =
     (filters.artistId ? 1 : 0) +
@@ -159,13 +177,10 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
     const baseDelay = inDrawer ? 0.1 : 0;
 
     return (
-      <div className={`space-y-6 ${inDrawer ? "" : ""}`}>
+      <div className={`space-y-5 ${inDrawer ? "" : "flex flex-col items-center"}`}>
         {/* Artists */}
         {data?.artists && data.artists.length > 0 && (
-          <FilterSection
-            title="Артист"
-            delay={baseDelay + 0.08}
-          >
+          <FilterSection title="Артист" delay={baseDelay + 0.08}>
             <FilterPill
               label="Всі"
               active={filters.artistId === null}
@@ -216,25 +231,43 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
           )
         )}
 
-        {/* Clear */}
+        {/* Clear button */}
         <AnimatePresence>
           {activeCount > 0 && (
-            <motion.button
-              type="button"
-              onClick={clearAll}
+            <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-jakarta font-bold uppercase tracking-wider text-coral bg-coral/10 hover:bg-coral/15 transition-colors"
+              className="pt-1"
             >
-              <span>Скинути</span>
-              <span className="font-grotesk text-[11px] tabular-nums">
-                ({activeCount})
-              </span>
-            </motion.button>
+              <motion.button
+                type="button"
+                onClick={clearAll}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                className="group flex items-center gap-2.5 px-5 py-2.5 rounded-full text-[11px] font-jakarta font-bold uppercase tracking-[0.06em] text-coral bg-coral/8 border border-coral/15 hover:bg-coral/12 hover:border-coral/25 transition-all duration-300"
+              >
+                {/* X icon */}
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 10 10"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  className="opacity-60 group-hover:opacity-100 transition-opacity"
+                >
+                  <line x1="1" y1="1" x2="9" y2="9" />
+                  <line x1="9" y1="1" x2="1" y2="9" />
+                </svg>
+                <span>Скинути</span>
+                <span className="font-grotesk text-[11px] tabular-nums opacity-60">
+                  ({activeCount})
+                </span>
+              </motion.button>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
@@ -243,19 +276,37 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
 
   return (
     <>
-      {/* ─── Desktop: inline filter bar ────────────────────────────── */}
-      <div className="hidden md:block mb-10 px-6 md:px-8">
-        {filterContent()}
-      </div>
+      {/* ─── Desktop: premium floating filter bar ─────────────────── */}
+      {hasFilters && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.1 }}
+          className="hidden md:block mb-12 mx-6 md:mx-8"
+        >
+          <div className="relative bg-white/60 backdrop-blur-xl rounded-2xl border border-stone-200/40 shadow-[0_4px_24px_rgba(28,25,23,0.04),0_1px_3px_rgba(28,25,23,0.02)] px-8 py-7">
+            {/* Subtle top accent line */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-stone-300/40" />
+            {filterContent()}
+          </div>
+        </motion.div>
+      )}
 
-      {/* ─── Mobile: trigger button + sort quick-access ────────────── */}
-      <div className="md:hidden flex items-center gap-3 px-6 mb-6">
+      {/* ─── Mobile: trigger button ──────────────────────────────── */}
+      {hasFilters && <div className="md:hidden flex items-center gap-3 px-6 mb-6">
         <motion.button
           type="button"
           onClick={() => setMobileOpen(true)}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          className="flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white shadow-soft text-xs font-jakarta font-bold uppercase tracking-wider text-stone-700"
+          className="
+            flex items-center gap-2.5 px-5 py-3 rounded-xl
+            bg-white/70 backdrop-blur-md border border-stone-200/50
+            shadow-[0_2px_12px_rgba(28,25,23,0.04)]
+            text-[11px] font-jakarta font-bold uppercase tracking-[0.06em] text-stone-700
+            transition-all duration-300
+            hover:bg-white hover:shadow-[0_4px_16px_rgba(28,25,23,0.06)]
+          "
         >
           {/* Filter icon */}
           <svg
@@ -264,13 +315,12 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2.5"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
+            className="text-stone-500"
           >
-            <line x1="4" y1="6" x2="20" y2="6" />
-            <line x1="8" y1="12" x2="20" y2="12" />
-            <line x1="12" y1="18" x2="20" y2="18" />
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
           </svg>
           <span>Фільтри</span>
 
@@ -282,15 +332,19 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                className="w-5 h-5 rounded-full bg-coral text-white font-grotesk text-[10px] flex items-center justify-center"
+                className="
+                  min-w-[20px] h-5 px-1 rounded-full
+                  bg-coral text-white font-grotesk text-[10px]
+                  flex items-center justify-center
+                  shadow-[0_0_8px_rgba(255,90,95,0.3)]
+                "
               >
                 {activeCount}
               </motion.span>
             )}
           </AnimatePresence>
         </motion.button>
-
-      </div>
+      </div>}
 
       {/* ─── Mobile drawer (bottom sheet) ──────────────────────────── */}
       <AnimatePresence>
@@ -302,8 +356,8 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="fixed inset-0 z-40 bg-stone-900/30 backdrop-blur-md md:hidden"
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 z-40 bg-stone-900/40 backdrop-blur-lg md:hidden"
               onClick={() => setMobileOpen(false)}
             />
 
@@ -320,20 +374,42 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
               }}
               className="fixed inset-x-0 bottom-0 z-50 md:hidden"
             >
-              <div className="bg-white rounded-t-3xl shadow-lift max-h-[85vh] flex flex-col">
+              <div className="bg-white/95 backdrop-blur-xl rounded-t-3xl shadow-[0_-8px_40px_rgba(28,25,23,0.12)] max-h-[85vh] flex flex-col">
                 {/* Handle + header */}
                 <div className="pt-3 pb-4 px-6 flex-shrink-0">
-                  <div className="w-10 h-1 rounded-full bg-stone-200 mx-auto mb-4" />
+                  <div className="w-10 h-1 rounded-full bg-stone-300/60 mx-auto mb-5" />
                   <div className="flex items-center justify-between">
-                    <h2 className="font-jakarta font-bold text-xs uppercase tracking-widest">
-                      Фільтри
-                    </h2>
+                    <div className="flex items-center gap-3">
+                      <h2 className="font-jakarta font-extrabold text-xs uppercase tracking-[0.08em]">
+                        Фільтри
+                      </h2>
+                      <AnimatePresence>
+                        {activeCount > 0 && (
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0 }}
+                            className="min-w-[20px] h-5 px-1 rounded-full bg-coral text-white font-grotesk text-[10px] flex items-center justify-center"
+                          >
+                            {activeCount}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
                     <button
                       type="button"
                       onClick={() => setMobileOpen(false)}
-                      className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-400 hover:text-stone-600 hover:bg-stone-200 transition-colors"
+                      className="
+                        w-8 h-8 rounded-full bg-stone-100 
+                        flex items-center justify-center 
+                        text-stone-400 hover:text-stone-600 hover:bg-stone-200 
+                        transition-all duration-200
+                      "
                     >
-                      ✕
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <line x1="1" y1="1" x2="9" y2="9" />
+                        <line x1="9" y1="1" x2="1" y2="9" />
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -344,16 +420,33 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
                 </div>
 
                 {/* Apply footer */}
-                <div className="flex-shrink-0 px-6 py-4 border-t border-stone-100">
-                  <motion.button
-                    type="button"
-                    onClick={() => setMobileOpen(false)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.97 }}
-                    className="w-full rounded-full py-3.5 px-8 font-jakarta font-bold text-xs uppercase tracking-wider bg-stone-900 text-white hover:shadow-lift transition-shadow"
-                  >
-                    Показати товари
-                  </motion.button>
+                <div className="flex-shrink-0 px-6 py-4 border-t border-stone-100/80 bg-white/80 backdrop-blur-sm">
+                  <div className="flex gap-3">
+                    {/* Clear all (conditional) */}
+                    <AnimatePresence>
+                      {activeCount > 0 && (
+                        <motion.button
+                          type="button"
+                          onClick={clearAll}
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          exit={{ opacity: 0, width: 0 }}
+                          className="rounded-xl py-3.5 px-5 font-jakarta font-bold text-[11px] uppercase tracking-[0.06em] text-stone-500 border border-stone-200 hover:border-stone-300 transition-colors whitespace-nowrap"
+                        >
+                          Очистити
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
+                    <motion.button
+                      type="button"
+                      onClick={() => setMobileOpen(false)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="flex-1 rounded-xl py-3.5 px-8 font-jakarta font-bold text-[11px] uppercase tracking-[0.06em] bg-stone-900 text-white hover:shadow-lift transition-all duration-300"
+                    >
+                      Показати товари
+                    </motion.button>
+                  </div>
                 </div>
               </div>
             </motion.div>
