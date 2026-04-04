@@ -49,7 +49,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
   if (filtered.length === 0) {
     return (
       <div className="bg-stone-100 md:rounded-xl overflow-hidden">
-        <div className="aspect-[4/5] flex items-center justify-center">
+        <div className="h-[calc(100dvh-8rem)] md:h-[calc(100dvh-12rem)] flex items-center justify-center">
           <span className="text-sm text-stone-400">
             Немає зображень
           </span>
@@ -62,7 +62,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
     <div className="flex flex-col">
       {/* Mobile: full-bleed soft carousel */}
       <div className="relative bg-stone-100 overflow-hidden md:hidden">
-        <div className="relative aspect-[4/5] w-full">
+        <div className="relative w-full h-[calc(100dvh-8rem)]">
           <div
             ref={mobileScrollRef}
             onScroll={handleMobileScroll}
@@ -94,7 +94,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
 
       {/* Desktop: full gallery with arrows and thumbnails */}
       <div className="hidden md:block">
-        <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-stone-100">
+        <div className="relative w-full h-[calc(100dvh-12rem)] rounded-xl overflow-hidden bg-stone-100">
           <div
             ref={desktopScrollRef}
             onScroll={handleDesktopScroll}

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useCitySearch, useWarehouses } from "@/hooks/use-nova-poshta";
 import { ValidationErrors } from "@/lib/utils/validation";
 import type { FormData } from "./checkout-form";
+import type { NovaWarehouse } from "@/types/order";
 
 interface StepShippingProps {
   formData: FormData;
@@ -24,6 +25,10 @@ export function StepShipping({
   const cityRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
+  const [warehouseQuery, setWarehouseQuery] = useState(formData.warehouseDescription);
+  const [showWarehouseDropdown, setShowWarehouseDropdown] = useState(false);
+  const warehouseRef = useRef<HTMLDivElement>(null);
+
   const { data: cities, isLoading: citiesLoading } =
     useCitySearch(debouncedQuery);
   const { data: warehouses, isLoading: warehousesLoading } = useWarehouses(
@@ -41,22 +46,52 @@ export function StepShipping({
     };
   }, [cityQuery]);
 
-  // Close dropdown on outside click
+  // Reset warehouse query when city changes
+  useEffect(() => {
+    setWarehouseQuery("");
+  }, [formData.cityRef]);
+
+  // Close dropdowns on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (cityRef.current && !cityRef.current.contains(e.target as Node)) {
         setShowCityDropdown(false);
+      }
+      if (warehouseRef.current && !warehouseRef.current.contains(e.target as Node)) {
+        setShowWarehouseDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  // Filter and group warehouses by search query and type
+  const { filteredBranches, filteredPostboxes } = useMemo(() => {
+    if (!warehouses) return { filteredBranches: [], filteredPostboxes: [] };
+    const q = warehouseQuery.toLowerCase().trim();
+    const filtered = q
+      ? warehouses.filter((wh: NovaWarehouse) => {
+          const num = wh.number.toString();
+          return (
+            wh.description.toLowerCase().includes(q) ||
+            wh.shortAddress.toLowerCase().includes(q) ||
+            num.includes(q) ||
+            num.padStart(3, "0").includes(q)
+          );
+        })
+      : warehouses;
+    return {
+      filteredBranches: filtered.filter((wh) => wh.type === "warehouse"),
+      filteredPostboxes: filtered.filter((wh) => wh.type === "postbox"),
+    };
+  }, [warehouses, warehouseQuery]);
+
+  const hasResults = filteredBranches.length > 0 || filteredPostboxes.length > 0;
+
   const handleCityInputChange = useCallback(
     (value: string) => {
       setCityQuery(value);
       setShowCityDropdown(true);
-      // Clear selection if user edits
       if (formData.cityRef) {
         setFormData((prev) => ({
           ...prev,
@@ -99,14 +134,37 @@ export function StepShipping({
     [setFormData, errors.cityRef, setErrors]
   );
 
+  const handleWarehouseInputChange = useCallback(
+    (value: string) => {
+      setWarehouseQuery(value);
+      setShowWarehouseDropdown(true);
+      // Clear selection if user edits
+      if (formData.warehouseRef) {
+        setFormData((prev) => ({
+          ...prev,
+          warehouseRef: "",
+          warehouseDescription: "",
+        }));
+      }
+      if (errors.warehouseRef) {
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next.warehouseRef;
+          return next;
+        });
+      }
+    },
+    [formData.warehouseRef, errors.warehouseRef, setFormData, setErrors]
+  );
+
   const handleWarehouseSelect = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const ref = e.target.value;
-      const wh = warehouses?.find((w) => w.ref === ref);
+    (wh: NovaWarehouse) => {
+      setWarehouseQuery(wh.description);
+      setShowWarehouseDropdown(false);
       setFormData((prev) => ({
         ...prev,
-        warehouseRef: ref,
-        warehouseDescription: wh?.description || "",
+        warehouseRef: wh.ref,
+        warehouseDescription: wh.description,
       }));
       if (errors.warehouseRef) {
         setErrors((prev) => {
@@ -116,7 +174,7 @@ export function StepShipping({
         });
       }
     },
-    [warehouses, setFormData, errors.warehouseRef, setErrors]
+    [setFormData, errors.warehouseRef, setErrors]
   );
 
   return (
@@ -183,9 +241,9 @@ export function StepShipping({
           )}
         </div>
 
-        {/* Warehouse select */}
+        {/* Warehouse search */}
         {formData.cityRef && (
-          <div>
+          <div ref={warehouseRef} className="relative">
             <label className="font-jakarta font-bold text-xs uppercase tracking-wider text-stone-500">
               Відділення Нової Пошти
             </label>
@@ -194,24 +252,80 @@ export function StepShipping({
                 Завантаження відділень...
               </div>
             ) : (
-              <select
-                value={formData.warehouseRef}
-                onChange={handleWarehouseSelect}
-                className={`
-                  w-full border border-stone-200 rounded-xl py-3 px-4 bg-white outline-none
-                  cursor-pointer
-                  focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10
-                  transition-all duration-200
-                  ${errors.warehouseRef ? "border-coral" : ""}
-                `}
-              >
-                <option value="">Оберіть відділення</option>
-                {warehouses?.map((wh) => (
-                  <option key={wh.ref} value={wh.ref}>
-                    {wh.description}
-                  </option>
-                ))}
-              </select>
+              <>
+                <input
+                  type="text"
+                  value={warehouseQuery}
+                  onChange={(e) => handleWarehouseInputChange(e.target.value)}
+                  onFocus={() => {
+                    if (!formData.warehouseRef) setShowWarehouseDropdown(true);
+                  }}
+                  placeholder="Введіть номер або адресу відділення"
+                  className={`
+                    w-full py-3 px-4 bg-white border border-stone-200 rounded-xl outline-none
+                    focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10
+                    placeholder:text-stone-400 transition-all duration-200
+                    ${errors.warehouseRef ? "border-coral" : ""}
+                  `}
+                />
+
+                {showWarehouseDropdown && (
+                  <div className="absolute z-20 left-0 right-0 top-full bg-white rounded-xl shadow-lift border border-stone-200/50 mt-1 overflow-hidden max-h-72 overflow-y-auto">
+                    {hasResults ? (
+                      <>
+                        {filteredBranches.length > 0 && (
+                          <>
+                            <div className="px-4 py-2 text-[10px] font-jakarta font-bold uppercase tracking-widest text-stone-400 bg-stone-50 sticky top-0">
+                              Відділення
+                            </div>
+                            {filteredBranches.map((wh: NovaWarehouse) => (
+                              <button
+                                key={wh.ref}
+                                type="button"
+                                onClick={() => handleWarehouseSelect(wh)}
+                                className="w-full text-left px-4 py-3 hover:bg-stone-50 border-b border-stone-100 last:border-b-0"
+                              >
+                                <span className="text-sm font-medium">
+                                  №{wh.number}
+                                </span>
+                                <span className="text-sm text-stone-500 ml-2">
+                                  {wh.shortAddress}
+                                </span>
+                              </button>
+                            ))}
+                          </>
+                        )}
+                        {filteredPostboxes.length > 0 && (
+                          <>
+                            <div className="px-4 py-2 text-[10px] font-jakarta font-bold uppercase tracking-widest text-stone-400 bg-stone-50 sticky top-0">
+                              Поштомати
+                            </div>
+                            {filteredPostboxes.map((wh: NovaWarehouse) => (
+                              <button
+                                key={wh.ref}
+                                type="button"
+                                onClick={() => handleWarehouseSelect(wh)}
+                                className="w-full text-left px-4 py-3 hover:bg-stone-50 border-b border-stone-100 last:border-b-0"
+                              >
+                                <span className="text-sm font-medium">
+                                  №{wh.number}
+                                </span>
+                                <span className="text-sm text-stone-500 ml-2">
+                                  {wh.shortAddress}
+                                </span>
+                              </button>
+                            ))}
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <div className="px-4 py-3 text-xs text-stone-400">
+                        Відділення не знайдено
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
             {errors.warehouseRef && (
               <span className="text-coral text-xs">

@@ -15,7 +15,7 @@ export function ProductDetail({ slug }: ProductDetailProps) {
     return (
       <div className="grid grid-cols-12 gap-8 px-6 py-8">
         <div className="col-span-12 lg:col-span-8">
-          <div className="aspect-[3/4] bg-stone-100 rounded-xl animate-pulse" />
+          <div className="h-[calc(100dvh-12rem)] bg-stone-100 rounded-xl animate-pulse" />
         </div>
         <div className="col-span-12 lg:col-span-4 p-6">
           <div className="h-8 w-3/4 bg-stone-100 rounded-xl animate-pulse mb-4" />

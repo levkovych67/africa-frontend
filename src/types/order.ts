@@ -41,6 +41,7 @@ export interface NovaWarehouse {
   description: string;
   number: string;
   shortAddress: string;
+  type: "warehouse" | "postbox";
 }
 
 export interface OrderResponse {

@@ -9,6 +9,6 @@ export async function searchCities(query: string): Promise<NovaCity[]> {
 
 export async function getWarehouses(cityRef: string): Promise<NovaWarehouse[]> {
   return apiClient<NovaWarehouse[]>(
-    `/api/v1/orders/nova-poshta/warehouses?cityRef=${encodeURIComponent(cityRef)}&limit=50`
+    `/api/v1/orders/nova-poshta/warehouses?cityRef=${encodeURIComponent(cityRef)}`
   );
 }
