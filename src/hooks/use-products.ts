@@ -8,6 +8,7 @@ export function useProducts(params?: {
   size?: number;
   search?: string;
   sort?: string;
+  artistId?: string;
 }) {
   return useQuery({
     queryKey: ["products", params],

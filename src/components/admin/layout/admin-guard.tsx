@@ -1,26 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
+
+function useStoreHydrated() {
+  return useSyncExternalStore(
+    (cb) => useAuthStore.persist.onFinishHydration(cb),
+    () => useAuthStore.persist.hasHydrated(),
+    () => false,
+  );
+}
 
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const accessToken = useAuthStore((s) => s.accessToken);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    const unsubFinishHydration = useAuthStore.persist.onFinishHydration(() => {
-      setHydrated(true);
-    });
-
-    if (useAuthStore.persist.hasHydrated()) {
-      setHydrated(true);
-    }
-
-    return unsubFinishHydration;
-  }, []);
+  const hydrated = useStoreHydrated();
 
   useEffect(() => {
     if (hydrated && !accessToken && pathname !== "/admin/login") {

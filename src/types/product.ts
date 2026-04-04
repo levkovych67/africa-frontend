@@ -26,3 +26,14 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ArtistFilter {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface ProductFilters {
+  artists: ArtistFilter[];
+  attributes: ProductAttribute[];
+}

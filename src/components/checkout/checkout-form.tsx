@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart";
 import { useCheckout } from "@/hooks/use-checkout";
-import { CheckoutPayload } from "@/types/order";
+import { CheckoutPayload, PaymentMethod } from "@/types/order";
 import { validateCheckout, ValidationErrors } from "@/lib/utils/validation";
 import { ApiRequestError } from "@/lib/api/client";
+import { createPayment } from "@/lib/api/orders";
 import { StepContacts } from "./step-contacts";
 import { StepShipping } from "./step-shipping";
 import { StepPayment } from "./step-payment";
@@ -31,6 +32,7 @@ export function CheckoutForm() {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [stockError, setStockError] = useState<string | null>(null);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -76,6 +78,12 @@ export function CheckoutForm() {
     const validationErrors = validateCheckout(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      const firstErrorField = Object.keys(validationErrors)[0];
+      const el = document.querySelector<HTMLElement>(`[name="${firstErrorField}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.focus();
+      }
       return;
     }
 
@@ -98,12 +106,26 @@ export function CheckoutForm() {
         warehouseDescription: formData.warehouseDescription,
       },
       comment: formData.comment || undefined,
+      paymentMethod,
     };
 
     try {
       const order = await checkout.mutateAsync(payload);
-      setOrderId(order.id);
-      clearCart();
+
+      if (paymentMethod === "ONLINE") {
+        try {
+          const { paymentUrl } = await createPayment(order.id);
+          clearCart();
+          window.location.href = paymentUrl;
+        } catch {
+          // Order exists in WAITING_PAYMENT — redirect to order page
+          clearCart();
+          setOrderId(order.id);
+        }
+      } else {
+        setOrderId(order.id);
+        clearCart();
+      }
     } catch (err) {
       if (err instanceof ApiRequestError && err.status === 400) {
         setStockError(err.message);
@@ -141,6 +163,8 @@ export function CheckoutForm() {
       <StepPayment
         items={items}
         total={totalPrice()}
+        paymentMethod={paymentMethod}
+        onPaymentMethodChange={setPaymentMethod}
         onSubmit={handleSubmit}
         isLoading={checkout.isPending}
       />

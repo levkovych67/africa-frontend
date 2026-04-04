@@ -57,11 +57,6 @@ export function StepShipping({
     };
   }, [cityQuery]);
 
-  // Reset warehouse query when city changes
-  useEffect(() => {
-    setWarehouseQuery("");
-  }, [formData.cityRef]);
-
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -126,6 +121,7 @@ export function StepShipping({
   const handleCitySelect = useCallback(
     (ref: string, name: string) => {
       setCityQuery(name);
+      setWarehouseQuery("");
       setShowCityDropdown(false);
       setFormData((prev) => ({
         ...prev,
@@ -201,6 +197,7 @@ export function StepShipping({
           </label>
           <input
             type="text"
+            name="cityRef"
             value={cityQuery}
             onChange={(e) => handleCityInputChange(e.target.value)}
             onFocus={() => {
@@ -286,6 +283,7 @@ export function StepShipping({
               <>
                 <input
                   type="text"
+                  name="warehouseRef"
                   value={warehouseQuery}
                   onChange={(e) => handleWarehouseInputChange(e.target.value)}
                   onFocus={() => {

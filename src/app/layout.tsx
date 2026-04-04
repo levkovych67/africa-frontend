@@ -15,6 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk">
+      <head>
+        <link rel="preconnect" href="https://africa-shop-dev.s3.eu-north-1.amazonaws.com" />
+        <link rel="dns-prefetch" href="https://africa-shop-dev.s3.eu-north-1.amazonaws.com" />
+      </head>
       <body className={`${inter.variable} ${plusJakartaSans.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
         <Providers>{children}</Providers>
       </body>

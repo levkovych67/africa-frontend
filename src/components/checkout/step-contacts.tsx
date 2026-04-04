@@ -25,6 +25,7 @@ export function StepContacts({ formData, errors, updateField }: StepContactsProp
           <FormInput
             label="Ім'я"
             name="firstName"
+            autoComplete="given-name"
             value={formData.firstName}
             onChange={(e) => updateField("firstName", e.target.value)}
             error={errors.firstName}
@@ -32,6 +33,7 @@ export function StepContacts({ formData, errors, updateField }: StepContactsProp
           <FormInput
             label="Прізвище"
             name="lastName"
+            autoComplete="family-name"
             value={formData.lastName}
             onChange={(e) => updateField("lastName", e.target.value)}
             error={errors.lastName}
@@ -41,6 +43,8 @@ export function StepContacts({ formData, errors, updateField }: StepContactsProp
           label="Email"
           name="email"
           type="email"
+          inputMode="email"
+          autoComplete="email"
           value={formData.email}
           onChange={(e) => updateField("email", e.target.value)}
           error={errors.email}
@@ -49,6 +53,9 @@ export function StepContacts({ formData, errors, updateField }: StepContactsProp
           label="Телефон"
           name="phone"
           type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          placeholder="+380"
           value={formData.phone}
           onChange={(e) => updateField("phone", e.target.value)}
           error={errors.phone}

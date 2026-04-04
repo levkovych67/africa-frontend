@@ -1,7 +1,9 @@
-import { OrderTracker } from "@/components/order/order-tracker";
+import dynamic from "next/dynamic";
 import { Header } from "@/components/layout/header";
-import { CartDrawer } from "@/components/cart/cart-drawer";
 import { PageTransition } from "@/components/layout/page-transition";
+
+const CartDrawer = dynamic(() => import("@/components/cart/cart-drawer").then(m => m.CartDrawer));
+const OrderTracker = dynamic(() => import("@/components/order/order-tracker").then(m => m.OrderTracker));
 
 interface OrderPageProps {
   params: Promise<{ id: string }>;

@@ -8,7 +8,8 @@ import { formatPrice } from "@/lib/utils/price";
 
 const STATUS_OPTIONS: { value: OrderStatus | ""; label: string }[] = [
   { value: "", label: "Всі" },
-  { value: "PENDING", label: "Очікує" },
+  { value: "WAITING_PAYMENT", label: "Очікує оплати" },
+  { value: "PENDING", label: "Нове" },
   { value: "CONFIRMED", label: "Підтверджено" },
   { value: "SHIPPED", label: "Відправлено" },
   { value: "DELIVERED", label: "Доставлено" },
@@ -16,11 +17,21 @@ const STATUS_OPTIONS: { value: OrderStatus | ""; label: string }[] = [
 ];
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
+  WAITING_PAYMENT: "bg-orange-100 text-orange-800",
   PENDING: "bg-yellow-100 text-yellow-800",
   CONFIRMED: "bg-blue-100 text-blue-800",
   SHIPPED: "bg-purple-100 text-purple-800",
   DELIVERED: "bg-green-100 text-green-800",
   CANCELLED: "bg-red-100 text-red-800",
+};
+
+const STATUS_LABELS: Record<OrderStatus, string> = {
+  WAITING_PAYMENT: "Очікує оплати",
+  PENDING: "Нове",
+  CONFIRMED: "Підтверджено",
+  SHIPPED: "Відправлено",
+  DELIVERED: "Доставлено",
+  CANCELLED: "Скасовано",
 };
 
 export default function AdminOrdersPage() {
@@ -126,7 +137,7 @@ export default function AdminOrdersPage() {
                       <span
                         className={`inline-block px-2 py-1 rounded-md text-xs font-medium ${STATUS_BADGE[order.status]}`}
                       >
-                        {order.status}
+                        {STATUS_LABELS[order.status] || order.status}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-600">

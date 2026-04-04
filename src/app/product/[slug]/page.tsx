@@ -1,9 +1,11 @@
 import { Metadata } from "next";
-import { ProductDetail } from "@/components/product/product-detail";
+import dynamic from "next/dynamic";
 import { Header } from "@/components/layout/header";
-import { CartDrawer } from "@/components/cart/cart-drawer";
 import { PageTransition } from "@/components/layout/page-transition";
 import { getProductBySlug } from "@/lib/api/products";
+
+const CartDrawer = dynamic(() => import("@/components/cart/cart-drawer").then(m => m.CartDrawer));
+const ProductDetail = dynamic(() => import("@/components/product/product-detail").then(m => m.ProductDetail));
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;

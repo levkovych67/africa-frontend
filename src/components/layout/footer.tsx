@@ -9,7 +9,7 @@ export function Footer() {
           {/* Logo + description */}
           <div className="max-w-xs">
             <Image
-              src="/images/new logo.PNG"
+              src="/images/new logo.webp"
               alt="AFRICA SHOP"
               width={140}
               height={48}
@@ -49,7 +49,7 @@ export function Footer() {
                   <span className="text-sm text-stone-400">Доставка — Нова Пошта</span>
                 </li>
                 <li>
-                  <span className="text-sm text-stone-400">Оплата при отриманні</span>
+                  <span className="text-sm text-stone-400">Оплата при отриманні або онлайн</span>
                 </li>
               </ul>
             </div>

@@ -11,6 +11,8 @@ export interface CheckoutItem {
   quantity: number;
 }
 
+export type PaymentMethod = "COD" | "ONLINE";
+
 export interface CheckoutPayload {
   firstName: string;
   lastName: string;
@@ -19,6 +21,7 @@ export interface CheckoutPayload {
   items: CheckoutItem[];
   shippingDetails: ShippingDetails;
   comment?: string;
+  paymentMethod: PaymentMethod;
 }
 
 export interface OrderItem {

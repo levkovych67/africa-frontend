@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Product } from "@/types/product";
 import {
   useCreateProduct,
@@ -259,10 +260,13 @@ export function ProductForm({ product }: ProductFormProps) {
         <div className="flex flex-wrap gap-3 mb-3">
           {images.map((url, i) => (
             <div key={i} className="relative group">
-              <img
+              <Image
                 src={url}
                 alt={`Image ${i + 1}`}
+                width={96}
+                height={96}
                 className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                unoptimized
               />
               <button
                 type="button"

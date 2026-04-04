@@ -19,7 +19,14 @@ export function validateCheckout(data: {
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     errors.email = "Невірний формат електронної пошти";
   }
-  if (!data.phone.trim()) errors.phone = "Обов'язкове поле";
+  if (!data.phone.trim()) {
+    errors.phone = "Обов'язкове поле";
+  } else {
+    const digits = data.phone.replace(/[\s\-\(\)]+/g, "");
+    if (!/^\+?\d{10,13}$/.test(digits)) {
+      errors.phone = "Невірний формат номера телефону";
+    }
+  }
   if (!data.cityRef) errors.cityRef = "Оберіть місто";
   if (!data.warehouseRef) errors.warehouseRef = "Оберіть відділення";
 

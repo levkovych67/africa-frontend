@@ -13,3 +13,15 @@ export async function submitCheckout(
 export async function getOrder(id: string): Promise<OrderResponse> {
   return apiClient<OrderResponse>(`/api/v1/orders/${id}`);
 }
+
+export async function createPayment(
+  orderId: string
+): Promise<{ paymentUrl: string }> {
+  return apiClient<{ paymentUrl: string }>(
+    `/api/v1/payments/create`,
+    {
+      method: "POST",
+      body: JSON.stringify({ orderId }),
+    }
+  );
+}

@@ -11,6 +11,7 @@ export interface AuthTokens {
 
 // Order status
 export type OrderStatus =
+  | "WAITING_PAYMENT"
   | "PENDING"
   | "CONFIRMED"
   | "SHIPPED"

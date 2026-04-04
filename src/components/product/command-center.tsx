@@ -51,6 +51,7 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
       image: product.images[0] || "",
     });
 
+    openCart();
   };
 
   const allVariantsOutOfStock = product.variants.every((v) => v.stock === 0);
@@ -106,16 +107,12 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
         </PrecisionButton>
       </div>
 
-      <div className="mt-8 space-y-6">
-        <div>
+      {product.description && (
+        <div className="mt-8">
           <h3 className="font-jakarta font-bold text-xs uppercase tracking-wider mb-2">Опис</h3>
-          <p className="text-sm leading-relaxed">{product.description || "Опис незабаром буде додано."}</p>
+          <p className="text-sm leading-relaxed text-stone-600">{product.description}</p>
         </div>
-        <div>
-          <h3 className="font-jakarta font-bold text-xs uppercase tracking-wider mb-2">Склад</h3>
-          <p className="text-sm leading-relaxed">Інформація про склад буде додана пізніше.</p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

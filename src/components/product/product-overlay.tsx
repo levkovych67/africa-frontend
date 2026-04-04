@@ -20,7 +20,7 @@ interface ProductOverlayProps {
   onClose: () => void;
 }
 
-function OverlayCarousel({
+function OverlayGallery({
   images,
   title,
 }: {
@@ -31,6 +31,15 @@ function OverlayCarousel({
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const scrollTo = useCallback((index: number) => {
+    setActiveIndex(index);
+    scrollRef.current?.children[index]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "start",
+    });
+  }, []);
+
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
     const { scrollLeft, clientWidth } = scrollRef.current;
@@ -40,36 +49,82 @@ function OverlayCarousel({
 
   if (filtered.length === 0) {
     return (
-      <div className="aspect-[4/5] bg-stone-100 flex items-center justify-center">
+      <div className="aspect-[3/4] bg-stone-100 rounded-2xl flex items-center justify-center">
         <span className="text-sm text-stone-400">Немає зображень</span>
       </div>
     );
   }
 
   return (
-    <div className="relative aspect-[4/5] w-full overflow-hidden bg-stone-100 rounded-2xl">
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {filtered.map((src, i) => (
-          <div key={i} className="w-full flex-none snap-center relative">
-            <Image
-              src={src}
-              alt={`${title} ${i + 1}`}
-              fill
-              className="object-cover"
-              sizes="80vw"
-              priority={i === 0}
-              loading={i < 2 ? "eager" : "lazy"}
-            />
-          </div>
-        ))}
+    <div className="flex flex-col gap-2">
+      {/* Main image */}
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-stone-100 rounded-2xl">
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {filtered.map((src, i) => (
+            <div key={i} className="w-full flex-none snap-center relative">
+              <Image
+                src={src}
+                alt={`${title} ${i + 1}`}
+                fill
+                className="object-cover"
+                sizes="(min-width: 768px) 45vw, 85vw"
+                priority={i === 0}
+                loading={i < 2 ? "eager" : "lazy"}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Navigation arrows */}
+        {filtered.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => scrollTo(Math.max(0, activeIndex - 1))}
+              className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full text-xs transition-opacity ${
+                activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-white"
+              }`}
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollTo(Math.min(filtered.length - 1, activeIndex + 1))}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full text-xs transition-opacity ${
+                activeIndex === filtered.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-white"
+              }`}
+            >
+              →
+            </button>
+          </>
+        )}
       </div>
+
+      {/* Thumbnails */}
       {filtered.length > 1 && (
-        <div className="absolute bottom-3 right-3 z-10 bg-white border border-stone-200 px-2 py-1 text-xs font-grotesk">
-          {activeIndex + 1} / {filtered.length}
+        <div className="flex gap-1.5">
+          {filtered.map((src, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => scrollTo(i)}
+              className={`relative shrink-0 w-14 h-14 rounded-lg overflow-hidden transition-opacity duration-200 ${
+                i === activeIndex ? "opacity-100 ring-2 ring-stone-900" : "opacity-50 hover:opacity-80"
+              }`}
+            >
+              <Image
+                src={src}
+                alt={`${title} мініатюра ${i + 1}`}
+                fill
+                className="object-cover"
+                sizes="56px"
+              />
+            </button>
+          ))}
         </div>
       )}
     </div>
@@ -83,7 +138,6 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(true);
   const [isEjecting, setIsEjecting] = useState(false);
-  const [showClose, setShowClose] = useState(false);
 
   // Physics wrapper Y — the "rubber band" axis
   const cardY = useMotionValue(0);
@@ -123,10 +177,6 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
     if (!atBottom) {
       pullUnlockedRef.current = false;
     }
-    // Show close button after scrolling 100px
-    if (el.scrollTop > 100 && !showClose) {
-      setShowClose(true);
-    }
     // Bounce when first hitting bottom
     if (atBottom && !wasAtBottomRef.current && !isPullingRef.current) {
       cardY.set(0);
@@ -145,7 +195,7 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
       });
     }
     wasAtBottomRef.current = atBottom;
-  }, [showClose, cardY]);
+  }, [cardY]);
 
   // ─── Ejection: card flies up off screen ───────────────────────────
   const ejectCard = useCallback(() => {
@@ -173,17 +223,15 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
     (scrollDelta: number): boolean => {
       if (isEjecting) return false;
       if (!isAtBottomRef.current) return false;
-      if (!pullUnlockedRef.current) return false; // not unlocked yet — wait for next gesture
+      if (!pullUnlockedRef.current) return false;
       if (scrollDelta <= 0) return false;
 
       isPullingRef.current = true;
       pullAccumRef.current += scrollDelta;
 
-      // iOS resistance: progressively harder
       const resistedY = -(pullAccumRef.current * pullResistance);
       cardY.set(resistedY);
 
-      // Past threshold? Eject.
       if (pullAccumRef.current * pullResistance >= ejectionThreshold) {
         ejectCard();
       }
@@ -201,7 +249,6 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
     const onTouchStart = (e: TouchEvent) => {
       lastTouchYRef.current = e.touches[0].clientY;
       checkBottom();
-      // Unlock pull if this NEW gesture starts while already at bottom
       if (isAtBottomRef.current) {
         pullUnlockedRef.current = true;
       }
@@ -210,15 +257,13 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
     const onTouchMove = (e: TouchEvent) => {
       if (isEjecting) return;
       const currentY = e.touches[0].clientY;
-      const delta = lastTouchYRef.current - currentY; // positive = scrolling down
+      const delta = lastTouchYRef.current - currentY;
       lastTouchYRef.current = currentY;
 
-      // Re-check bottom on every move
       checkBottom();
 
       if (isPullingRef.current || (isAtBottomRef.current && delta > 0)) {
         if (delta < 0 && isPullingRef.current) {
-          // Reversing while pulling — reduce accumulator
           pullAccumRef.current = Math.max(0, pullAccumRef.current + delta);
           if (pullAccumRef.current <= 0) {
             snapBack();
@@ -267,13 +312,10 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
     const onWheel = (e: WheelEvent) => {
       if (isEjecting) return;
 
-      // Check bottom after current scroll frame
       checkBottom();
 
-      // If at bottom but not yet unlocked, consume downward scroll and wait for settle
       if (isAtBottomRef.current && !pullUnlockedRef.current && e.deltaY > 0) {
         e.preventDefault();
-        // After wheel momentum stops (200ms), unlock for next scroll
         if (settleTimer) clearTimeout(settleTimer);
         settleTimer = setTimeout(() => {
           if (isAtBottomRef.current) {
@@ -283,14 +325,12 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
         return;
       }
 
-      // Use rAF to re-check after browser applies scroll
       if (!isAtBottomRef.current && !isPullingRef.current) {
         requestAnimationFrame(() => checkBottom());
         return;
       }
 
       if (e.deltaY <= 0) {
-        // Scrolling up — if we're pulling, reverse
         if (isPullingRef.current) {
           pullAccumRef.current = Math.max(0, pullAccumRef.current + e.deltaY);
           if (pullAccumRef.current <= 0) {
@@ -304,11 +344,9 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
         return;
       }
 
-      // Scrolling down at bottom — apply rubber band
       if (applyPull(e.deltaY)) {
         e.preventDefault();
 
-        // Debounced release: if wheel stops, evaluate threshold
         if (wheelTimerRef.current) clearTimeout(wheelTimerRef.current);
         wheelTimerRef.current = setTimeout(() => {
           if (isEjecting) return;
@@ -357,7 +395,7 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Entrance/exit animation wrapper — no overflow */}
+          {/* Entrance/exit animation wrapper */}
           <motion.div
             key="overlay-entrance"
             initial={{ y: "100vh" }}
@@ -371,50 +409,52 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
             }}
             className="fixed inset-x-0 top-16 bottom-0 z-50"
           >
-            {/* Scrollable wrapper — scrolls the card + rubber band */}
+            {/* Scrollable wrapper */}
             <motion.div
               ref={scrollRef}
               onScroll={checkBottom}
               style={{ y: cardY }}
               className="h-full overflow-y-auto overscroll-none pointer-events-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              {/* Top spacer — scrolls away so card becomes flush with navbar */}
               <div className="h-4" />
               <div className="px-4 pb-4">
-                {/* Card — pure visual, no transforms */}
-                <div className="bg-white rounded-3xl shadow-lift">
-                  <div className="px-6 pt-6 pb-6">
+                <div className="bg-white rounded-3xl shadow-lift relative">
+                  {/* Close button — always visible */}
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-stone-500 hover:bg-stone-900 hover:text-white transition-all duration-200"
+                  >
+                    ✕
+                  </button>
+
+                  <div className="p-5 md:p-6">
                     {isLoading || !product ? (
                       <div className="space-y-4">
-                        <div className="aspect-[4/5] bg-stone-100 animate-pulse" />
-                        <div className="h-6 w-3/4 bg-stone-100 animate-pulse" />
-                        <div className="h-5 w-1/4 bg-stone-100 animate-pulse" />
+                        <div className="aspect-[3/4] bg-stone-100 rounded-2xl animate-pulse" />
+                        <div className="h-6 w-3/4 bg-stone-100 rounded-xl animate-pulse" />
+                        <div className="h-5 w-1/4 bg-stone-100 rounded-xl animate-pulse" />
                         <div className="grid grid-cols-4 gap-2">
                           {Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="h-12 bg-stone-100 animate-pulse" />
+                            <div key={i} className="h-12 bg-stone-100 rounded-xl animate-pulse" />
                           ))}
                         </div>
-                        <div className="h-12 bg-stone-100 animate-pulse" />
+                        <div className="h-12 bg-stone-100 rounded-xl animate-pulse" />
                       </div>
                     ) : (
-                      <>
-                        <OverlayCarousel images={product.images} title={product.title} />
-                        <div className="mt-4">
+                      <div className="md:grid md:grid-cols-2 md:gap-6">
+                        {/* Left — gallery */}
+                        <div>
+                          <OverlayGallery images={product.images} title={product.title} />
+                        </div>
+
+                        {/* Right — product info */}
+                        <div className="mt-4 md:mt-0">
                           <CommandCenter product={product} compact />
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
-
-                  {/* Close button — appears after scrolling */}
-                  {showClose && (
-                    <div
-                      onClick={() => setIsOpen(false)}
-                      className="flex justify-center py-3 cursor-pointer bg-stone-50/80 backdrop-blur-sm"
-                    >
-                      <span className="font-jakarta text-[9px] text-stone-500 uppercase tracking-wider">закрити</span>
-                    </div>
-                  )}
                 </div>
               </div>
 

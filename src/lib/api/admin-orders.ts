@@ -24,10 +24,11 @@ export async function getAdminOrders(params?: {
 
 export async function updateOrderStatus(
   id: string,
-  status: OrderStatus
+  status: OrderStatus,
+  trackingNumber?: string
 ): Promise<AdminOrder> {
   return adminClient<AdminOrder>(`/api/v1/admin/orders/${id}/status`, {
     method: "PUT",
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, trackingNumber: trackingNumber || undefined }),
   });
 }

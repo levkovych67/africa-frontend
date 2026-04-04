@@ -1,13 +1,15 @@
 "use client";
 
 import { useRef } from "react";
+import dynamic from "next/dynamic";
 import { HeroSection } from "@/components/home/hero-section";
-import { ProductFeed } from "@/components/home/product-feed";
 import { Header } from "@/components/layout/header";
-import { CartDrawer } from "@/components/cart/cart-drawer";
 import { PageTransition } from "@/components/layout/page-transition";
-import { Footer } from "@/components/layout/footer";
-import { ScrollSnap } from "@/components/home/scroll-snap";
+
+const CartDrawer = dynamic(() => import("@/components/cart/cart-drawer").then(m => m.CartDrawer), { ssr: false });
+const ProductFeed = dynamic(() => import("@/components/home/product-feed").then(m => m.ProductFeed));
+const Footer = dynamic(() => import("@/components/layout/footer").then(m => m.Footer));
+const ScrollSnap = dynamic(() => import("@/components/home/scroll-snap").then(m => m.ScrollSnap), { ssr: false });
 
 export default function Home() {
   const productSectionRef = useRef<HTMLElement>(null);
