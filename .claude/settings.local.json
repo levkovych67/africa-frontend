@@ -6,7 +6,9 @@
       "Bash(npx tsc:*)",
       "Bash(npx next:*)",
       "Bash(npm install:*)",
-      "Skill(megathink)"
+      "Skill(megathink)",
+      "Bash(mv:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { cn } from "@/lib/cn";
 import { Product } from "@/types/product";
 import { formatPrice } from "@/lib/utils/price";
 
@@ -92,9 +93,7 @@ export function ProductCard({ product, priority = false, onExpand }: ProductCard
           src={images[0]}
           alt={`${product.title} 1`}
           fill
-          className={`object-cover w-full h-full transition-opacity duration-200 ease-in-out ${
-            activeIndex === 0 ? "opacity-100" : "opacity-0"
-          }`}
+          className={cn("object-cover w-full h-full transition-opacity duration-200 ease-in-out", activeIndex === 0 ? "opacity-100" : "opacity-0")}
           sizes="(max-width: 1024px) 50vw, 25vw"
           priority={priority}
         />
@@ -107,9 +106,7 @@ export function ProductCard({ product, priority = false, onExpand }: ProductCard
               src={img}
               alt={`${product.title} ${i + 2}`}
               fill
-              className={`object-cover w-full h-full transition-opacity duration-200 ease-in-out ${
-                i + 1 === activeIndex ? "opacity-100" : "opacity-0"
-              }`}
+              className={cn("object-cover w-full h-full transition-opacity duration-200 ease-in-out", i + 1 === activeIndex ? "opacity-100" : "opacity-0")}
               sizes="(max-width: 1024px) 50vw, 25vw"
             />
           ))}
@@ -120,9 +117,7 @@ export function ProductCard({ product, priority = false, onExpand }: ProductCard
             {images.map((_, i) => (
               <div
                 key={i}
-                className={`h-[2px] flex-1 transition-colors duration-0 ${
-                  i === activeIndex ? "bg-white" : "bg-white/50"
-                }`}
+                className={cn("h-[2px] flex-1 transition-colors duration-0", i === activeIndex ? "bg-white" : "bg-white/50")}
               />
             ))}
           </div>
@@ -134,7 +129,7 @@ export function ProductCard({ product, priority = false, onExpand }: ProductCard
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="snap-carousel"
         >
           {images.map((img, i) => (
             <div key={i} className="min-w-full snap-center relative">
@@ -157,9 +152,7 @@ export function ProductCard({ product, priority = false, onExpand }: ProductCard
             {images.map((_, i) => (
               <div
                 key={i}
-                className={`w-1.5 h-1.5 transition-colors duration-0 ${
-                  i === activeIndex ? "bg-white" : "bg-white/50"
-                }`}
+                className={cn("w-1.5 h-1.5 transition-colors duration-0", i === activeIndex ? "bg-white" : "bg-white/50")}
               />
             ))}
           </div>

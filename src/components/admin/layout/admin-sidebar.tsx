@@ -9,6 +9,7 @@ const navLinks = [
   { href: "/admin/orders", label: "Замовлення" },
   { href: "/admin/products", label: "Товари" },
   { href: "/admin/artists", label: "Артисти" },
+  { href: "/admin/users", label: "Адміністратори" },
 ];
 
 export function AdminSidebar() {

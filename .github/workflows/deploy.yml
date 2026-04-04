@@ -20,7 +20,7 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             npm ci
-            NEXT_PUBLIC_API_URL=http://${{ secrets.VPS_HOST }} npm run build
+            NEXT_PUBLIC_API_URL=https://africaua.store npm run build
             rm -rf .next/standalone/.next/static
             cp -r .next/static .next/standalone/.next/
             rm -rf .next/standalone/public

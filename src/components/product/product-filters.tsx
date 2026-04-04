@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { cn } from "@/lib/cn";
 import { useProductFilters } from "@/hooks/use-product-filters";
 import { ArtistFilter, ProductAttribute } from "@/types/product";
 
@@ -64,16 +65,14 @@ function FilterPill({
       }}
       whileHover={{ scale: 1.06, y: -1 }}
       whileTap={{ scale: 0.95 }}
-      className={`
-        relative px-4 py-2.5 rounded-xl text-[11px] font-jakarta font-bold uppercase tracking-[0.06em]
-        transition-all duration-300 ease-out cursor-pointer select-none
-        border backdrop-blur-sm
-        ${
-          active
-            ? "bg-stone-900 text-white border-stone-900 shadow-[0_4px_16px_rgba(28,25,23,0.2)]"
-            : "bg-white/80 text-stone-600 border-stone-200/60 hover:bg-white hover:border-stone-300 hover:text-stone-800 hover:shadow-[0_2px_12px_rgba(28,25,23,0.06)]"
-        }
-      `}
+      className={cn(
+        "relative px-4 py-2.5 rounded-xl text-[11px] font-jakarta font-bold uppercase tracking-[0.06em]",
+        "transition-all duration-300 ease-out cursor-pointer select-none",
+        "border backdrop-blur-sm",
+        active
+          ? "bg-stone-900 text-white border-stone-900 shadow-[0_4px_16px_rgba(28,25,23,0.2)]"
+          : "bg-white/80 text-stone-600 border-stone-200/60 hover:bg-white hover:border-stone-300 hover:text-stone-800 hover:shadow-[0_2px_12px_rgba(28,25,23,0.06)]"
+      )}
     >
       {/* Active indicator dot */}
       <AnimatePresence>
@@ -177,7 +176,7 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
     const baseDelay = inDrawer ? 0.1 : 0;
 
     return (
-      <div className={`space-y-5 ${inDrawer ? "" : "flex flex-col items-center"}`}>
+      <div className={cn("space-y-5", !inDrawer && "flex flex-col items-center")}>
         {/* Artists */}
         {data?.artists && data.artists.length > 0 && (
           <FilterSection title="Артист" delay={baseDelay + 0.08}>
@@ -415,7 +414,7 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
                 </div>
 
                 {/* Scrollable content */}
-                <div className="overflow-y-auto px-6 pb-8 flex-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="overflow-y-auto px-6 pb-8 flex-1 scrollbar-none">
                   {filterContent(true)}
                 </div>
 

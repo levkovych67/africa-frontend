@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/cn";
+
 interface SizeSelectorProps {
   label: string;
   values: string[];
@@ -29,11 +31,11 @@ export function SizeSelector({
               type="button"
               onClick={() => !isUnavailable && onSelect(value)}
               disabled={isUnavailable}
-              className={`
-                rounded-xl border border-stone-200 py-3 text-center font-jakarta text-sm transition-all duration-200 active:scale-[0.97]
-                ${isSelected ? "bg-stone-900 text-white border-stone-900" : "bg-white text-stone-900 border-stone-200 hover:border-stone-400"}
-                ${isUnavailable ? "opacity-30 line-through cursor-not-allowed" : "cursor-pointer"}
-              `}
+              className={cn(
+                "rounded-xl border border-stone-200 py-3 text-center font-jakarta text-sm transition-all duration-200 active:scale-[0.97]",
+                isSelected ? "bg-stone-900 text-white border-stone-900" : "bg-white text-stone-900 border-stone-200 hover:border-stone-400",
+                isUnavailable ? "opacity-30 line-through cursor-not-allowed" : "cursor-pointer"
+              )}
             >
               {value}
             </button>

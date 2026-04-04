@@ -1,6 +1,7 @@
 "use client";
 
 import { InputHTMLAttributes } from "react";
+import { cn } from "@/lib/cn";
 
 interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -19,14 +20,7 @@ export function FormInput({
         {label}
       </label>
       <input
-        className={`
-          w-full py-3 px-4 bg-white border border-stone-200 rounded-xl outline-none
-          focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10
-          placeholder:text-stone-400
-          transition-all duration-200
-          ${error ? "border-coral" : ""}
-          ${className}
-        `}
+        className={cn("input-base", error && "border-coral", className)}
         {...props}
       />
       {error && (

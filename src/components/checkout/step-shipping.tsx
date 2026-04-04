@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useCitySearch, useWarehouses } from "@/hooks/use-nova-poshta";
+import { cn } from "@/lib/cn";
 import { ValidationErrors } from "@/lib/utils/validation";
 import type { FormData } from "./checkout-form";
 import type { NovaWarehouse } from "@/types/order";
@@ -204,12 +205,10 @@ export function StepShipping({
               if (!formData.cityRef) setShowCityDropdown(true);
             }}
             placeholder="Почніть вводити назву міста"
-            className={`
-              w-full py-3 px-4 bg-white border border-stone-200 rounded-xl outline-none
-              focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10
-              placeholder:text-stone-400 transition-all duration-200
-              ${errors.cityRef ? "border-coral" : ""}
-            `}
+            className={cn(
+              "input-base",
+              errors.cityRef && "border-coral"
+            )}
           />
           {errors.cityRef && (
             <span className="text-coral text-xs">
@@ -290,12 +289,12 @@ export function StepShipping({
                     if (!formData.warehouseRef) setShowWarehouseDropdown(true);
                   }}
                   placeholder="Введіть номер або адресу відділення"
-                  className={`
-                    w-full py-3 px-4 bg-white border border-stone-200 rounded-xl outline-none
-                    focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10
-                    placeholder:text-stone-400 transition-all duration-200
-                    ${errors.warehouseRef ? "border-coral" : ""}
-                  `}
+                  className={cn(
+                    "w-full py-3 px-4 bg-white border border-stone-200 rounded-xl outline-none",
+                    "focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10",
+                    "placeholder:text-stone-400 transition-all duration-200",
+                    errors.warehouseRef && "border-coral"
+                  )}
                 />
 
                 {showWarehouseDropdown && (
@@ -376,11 +375,7 @@ export function StepShipping({
             }
             placeholder="Побажання щодо замовлення (необов'язково)"
             rows={3}
-            className="
-              w-full bg-white border border-stone-200 rounded-xl py-3 px-4 outline-none
-              placeholder:text-stone-400 focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10
-              transition-all duration-200 resize-none
-            "
+            className="input-base resize-none"
           />
         </div>
       </div>

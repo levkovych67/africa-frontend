@@ -131,7 +131,7 @@ export function CartDrawer() {
               </div>
 
               {/* Items list */}
-              <div className="flex-1 overflow-y-auto flex flex-col gap-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex-1 overflow-y-auto flex flex-col gap-3 scrollbar-none">
                 {items.length === 0 ? (
                   <motion.div
                     initial={{ opacity: 0 }}

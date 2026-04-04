@@ -1,191 +1,276 @@
 "use client";
 
+import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { useOrder } from "@/hooks/use-checkout";
 import { formatPrice } from "@/lib/utils/price";
-
-const STATUS_LABELS: Record<string, string> = {
-  WAITING_PAYMENT: "Очікує оплати",
-  PENDING: "Очікує підтвердження",
-  CONFIRMED: "Підтверджено",
-  SHIPPED: "Відправлено",
-  DELIVERED: "Доставлено",
-  CANCELLED: "Скасовано",
-};
-
-const STATUS_STEPS = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED"];
 
 interface OrderTrackerProps {
   orderId: string;
 }
 
+/* ─── Mini icon components ─── */
+function IconPackage() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+      <path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" />
+    </svg>
+  );
+}
+
+function IconTruck() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z" />
+      <circle cx="5.5" cy="18.5" r="2.5" />
+      <circle cx="18.5" cy="18.5" r="2.5" />
+    </svg>
+  );
+}
+
+function IconUser() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+function IconMessage() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+    </svg>
+  );
+}
+
+function IconArrowLeft() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
+  );
+}
+
+/* ─── Skeleton loader ─── */
+function OrderSkeleton() {
+  return (
+    <div className="max-w-[620px] mx-auto px-6 py-16">
+      <div className="flex flex-col items-center mb-12">
+        <div className="w-20 h-20 rounded-full bg-stone-100 animate-pulse mb-6" />
+        <div className="h-7 w-44 bg-stone-100 animate-pulse rounded-full mb-3" />
+        <div className="h-4 w-56 bg-stone-100 animate-pulse rounded-full" />
+      </div>
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="h-20 bg-stone-100 animate-pulse rounded-2xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Status badge config ─── */
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: string }> = {
+  WAITING_PAYMENT: { label: "Очікує оплати", color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200/40", icon: "⏳" },
+  PENDING: { label: "Обробляється", color: "text-stone-600", bg: "bg-stone-50", border: "border-stone-200/40", icon: "📋" },
+  CONFIRMED: { label: "Підтверджено", color: "text-emerald", bg: "bg-emerald/5", border: "border-emerald/15", icon: "✓" },
+  SHIPPED: { label: "Відправлено", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200/40", icon: "🚚" },
+  DELIVERED: { label: "Доставлено", color: "text-emerald", bg: "bg-emerald/5", border: "border-emerald/15", icon: "✅" },
+  CANCELLED: { label: "Скасовано", color: "text-coral", bg: "bg-coral/5", border: "border-coral/15", icon: "✕" },
+};
+
+/* ─── Stagger animation helpers ─── */
+const stagger = (i: number) => ({
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay: 0.15 + i * 0.08, type: "spring" as const, stiffness: 300, damping: 30 },
+});
+
+/* ─── Main component ─── */
 export function OrderTracker({ orderId }: OrderTrackerProps) {
   const { data: order, isLoading, error } = useOrder(orderId);
 
-  if (isLoading) {
-    return (
-      <div className="max-w-2xl mx-auto px-6 py-12">
-        <div className="h-6 w-40 bg-stone-100 animate-pulse rounded-full mb-3" />
-        <div className="h-4 w-56 bg-stone-100 animate-pulse rounded-full mb-10" />
-        <div className="flex gap-2 mb-10">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex-1 h-2 bg-stone-100 animate-pulse rounded-full" />
-          ))}
-        </div>
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-14 bg-stone-100 animate-pulse rounded-2xl" />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <OrderSkeleton />;
 
   if (error || !order) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-20 text-center">
-        <p className="font-grotesk text-5xl text-stone-200 font-bold mb-4">?</p>
-        <p className="text-sm text-stone-500">Замовлення не знайдено</p>
+      <div className="max-w-[620px] mx-auto px-6 py-24 text-center">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          className="mx-auto w-20 h-20 rounded-full bg-stone-100 flex items-center justify-center mb-6"
+        >
+          <span className="text-3xl text-stone-300">?</span>
+        </motion.div>
+        <p className="font-jakarta font-semibold text-stone-500 mb-6">
+          Замовлення не знайдено
+        </p>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-900 transition-colors"
+        >
+          <IconArrowLeft /> Повернутися до магазину
+        </Link>
       </div>
     );
   }
 
-  const isCancelled = order.status === "CANCELLED";
-  const isWaitingPayment = order.status === "WAITING_PAYMENT";
-  const currentStepIndex = STATUS_STEPS.indexOf(order.status);
+  const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.PENDING;
 
   return (
-    <motion.div
-      className="max-w-2xl mx-auto px-6 py-12"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-    >
-      {/* Header */}
-      <h1 className="font-jakarta font-bold text-xl tracking-tight mb-1">
-        Замовлення
-      </h1>
-      <p className="text-sm text-stone-500 mb-8">
-        <span className="font-grotesk">#{orderId.slice(0, 8)}…</span>
-        {" "}&middot;{" "}
-        {new Date(order.createdAt).toLocaleDateString("uk-UA")}
-      </p>
+    <div className="bg-pearl pb-12 md:pb-16 min-h-[calc(100vh-64px)]">
+      {/* ─── Thematic Hero Banner ─── */}
+      <div className="relative w-full h-[35vh] min-h-[260px] md:min-h-[300px] mb-8 bg-stone-900 border-b border-stone-200/50 flex flex-col items-center justify-end overflow-hidden">
+        <Image
+          src="/images/OrderPage.webp"
+          alt="AFRICA SHOP"
+          fill
+          priority
+          className="object-cover opacity-50 mix-blend-luminosity scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-pearl via-pearl/40 to-stone-900/40" />
 
-      {/* Status */}
-      {isCancelled ? (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-coral/8 border border-coral/15 rounded-2xl p-5 mb-8"
+          className="relative z-10 flex flex-col items-center text-center px-4 pb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
-          <p className="text-sm font-jakarta font-semibold text-coral">
-            Замовлення скас��вано
-          </p>
-        </motion.div>
-      ) : isWaitingPayment ? (
+          {/* Animated check circle */}
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
+            className="w-[72px] h-[72px] rounded-full bg-white/60 backdrop-blur-md shadow-soft flex items-center justify-center mb-6 relative"
+          >
+            <motion.svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-emerald"
+            >
+              <motion.path
+                d="M20 6L9 17l-5-5"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+              />
+            </motion.svg>
+            {/* Pulse ring */}
+            <motion.div
+              className="absolute inset-0 rounded-full border border-emerald/30"
+              initial={{ scale: 1, opacity: 1 }}
+              animate={{ scale: 1.5, opacity: 0 }}
+              transition={{ duration: 1.5, delay: 0.6, ease: "easeOut", repeat: Infinity, repeatDelay: 3 }}
+            />
+          </motion.div>
+
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, type: "spring", stiffness: 300, damping: 30 }}
+          className="font-jakarta font-bold text-2xl tracking-tight mb-2"
+        >
+          Ваше замовлення
+        </motion.h1>
+
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-amber-50 border border-amber-200/50 rounded-2xl p-5 mb-8"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, type: "spring", stiffness: 300, damping: 30 }}
+          className="flex items-center gap-3"
         >
-          <p className="text-sm font-jakarta font-semibold text-amber-700">
-            Очікує оплати
-          </p>
-          <p className="text-xs text-amber-600/70 mt-1">
-            Після оплати статус оновиться автоматично
-          </p>
+          <span className="font-grotesk text-sm text-stone-400 tracking-wide">
+            #{orderId.slice(0, 8)}…
+          </span>
+          <span className="text-stone-200">·</span>
+          <span className="text-sm text-stone-400">
+            {new Date(order.createdAt).toLocaleDateString("uk-UA", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </span>
         </motion.div>
-      ) : (
-        <>
-          {/* Progress bar */}
-          <div className="flex items-center gap-1.5 mb-3">
-            {STATUS_STEPS.map((step, i) => (
-              <div key={step} className="flex-1 h-2 rounded-full overflow-hidden bg-stone-100">
-                {i <= currentStepIndex && (
-                  <motion.div
-                    className="h-full bg-stone-900 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: "100%" }}
-                    transition={{
-                      duration: 0.5,
-                      delay: i * 0.15,
-                      ease: "easeOut",
-                    }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
 
-          {/* Step labels */}
-          <div className="flex gap-1.5 mb-8">
-            {STATUS_STEPS.map((step, i) => (
-              <p
-                key={step}
-                className={`flex-1 text-[10px] font-jakarta font-bold uppercase tracking-wider ${
-                  i <= currentStepIndex ? "text-stone-900" : "text-stone-300"
-                }`}
-              >
-                {STATUS_LABELS[step]}
-              </p>
-            ))}
-          </div>
-        </>
-      )}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.45, type: "spring", stiffness: 300, damping: 25 }}
+            className={`mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border shadow-sm backdrop-blur-sm bg-white/90 ${cfg.border}`}
+          >
+            <span className="text-sm">{cfg.icon}</span>
+            <span className={`font-jakarta font-semibold text-xs uppercase tracking-wider ${cfg.color}`}>
+              {cfg.label}
+            </span>
+          </motion.div>
+        </motion.div>
+      </div>
 
-      {/* Items */}
+      <div className="max-w-[620px] mx-auto px-6">
+        {/* ─── Items card ─── */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15, type: "spring", stiffness: 300, damping: 30 }}
-        className="bg-white rounded-2xl shadow-soft overflow-hidden mb-6"
+        {...stagger(0)}
+        className="bg-white rounded-2xl shadow-soft overflow-hidden mb-4"
       >
-        <div className="px-5 py-4 border-b border-stone-100">
+        <div className="px-5 py-4 flex items-center gap-3 border-b border-stone-100">
+          <span className="text-stone-400"><IconPackage /></span>
           <h3 className="font-jakarta font-bold text-xs uppercase tracking-widest text-stone-400">
             Товари
           </h3>
         </div>
-        <div className="divide-y divide-stone-100">
+        <div className="divide-y divide-stone-50">
           {order.items.map((item, i) => (
-            <div key={i} className="px-5 py-4 flex items-center justify-between">
+            <div key={i} className="px-5 py-4 flex items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-stone-900 truncate">
                   {item.productTitle}
                 </p>
-                <p className="text-xs text-stone-500 mt-0.5">
+                <p className="text-xs text-stone-400 mt-0.5">
                   {item.variantName || "—"}
-                  <span className="font-grotesk"> x {item.quantity}</span>
+                  <span className="font-grotesk"> × {item.quantity}</span>
                 </p>
               </div>
-              <span className="font-grotesk text-sm text-stone-900 ml-4 shrink-0">
+              <span className="font-grotesk text-sm font-medium text-stone-900 shrink-0 tabular-nums">
                 {formatPrice(item.unitPrice * item.quantity)}
               </span>
             </div>
           ))}
         </div>
-        <div className="px-5 py-4 bg-stone-50 flex items-center justify-between">
-          <span className="font-jakarta font-bold text-xs uppercase tracking-wider text-stone-500">
+        <div className="px-5 py-4 bg-stone-50/80 flex items-center justify-between">
+          <span className="font-jakarta font-bold text-xs uppercase tracking-wider text-stone-400">
             Разом
           </span>
-          <span className="font-grotesk text-lg font-medium text-stone-900">
+          <span className="font-grotesk text-lg font-semibold text-stone-900 tabular-nums">
             {formatPrice(order.totalAmount)}
           </span>
         </div>
       </motion.div>
 
-      {/* Details cards */}
+      {/* ─── Info cards grid ─── */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25, type: "spring", stiffness: 300, damping: 30 }}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        {...stagger(1)}
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4"
       >
         {/* Shipping */}
         <div className="bg-white rounded-2xl shadow-soft p-5">
-          <h3 className="font-jakarta font-bold text-[10px] uppercase tracking-[0.08em] text-stone-400 mb-3">
-            Доставка
-          </h3>
-          <p className="text-sm text-stone-900">
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="text-stone-400"><IconTruck /></span>
+            <h3 className="label-section">
+              Доставка
+            </h3>
+          </div>
+          <p className="text-sm font-medium text-stone-900">
             {order.shippingDetails.carrier || "Нова Пошта"}
           </p>
           <p className="text-sm text-stone-500 mt-1">
@@ -195,11 +280,11 @@ export function OrderTracker({ orderId }: OrderTrackerProps) {
             {order.shippingDetails.warehouseDescription}
           </p>
           {order.shippingDetails.trackingNumber && (
-            <div className="mt-3 px-3 py-2 bg-stone-50 rounded-xl">
+            <div className="mt-3 px-3.5 py-2.5 bg-stone-50 rounded-xl border border-stone-100">
               <p className="text-[10px] font-jakarta font-bold uppercase tracking-wider text-stone-400 mb-1">
                 ТТН
               </p>
-              <p className="font-grotesk text-sm font-medium text-stone-900 tracking-wide">
+              <p className="font-grotesk text-sm font-medium text-stone-900 tracking-wide tabular-nums">
                 {order.shippingDetails.trackingNumber}
               </p>
             </div>
@@ -208,10 +293,13 @@ export function OrderTracker({ orderId }: OrderTrackerProps) {
 
         {/* Contacts */}
         <div className="bg-white rounded-2xl shadow-soft p-5">
-          <h3 className="font-jakarta font-bold text-[10px] uppercase tracking-[0.08em] text-stone-400 mb-3">
-            Контакти
-          </h3>
-          <p className="text-sm text-stone-900">
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="text-stone-400"><IconUser /></span>
+            <h3 className="label-section">
+              Контакти
+            </h3>
+          </div>
+          <p className="text-sm font-medium text-stone-900">
             {order.firstName} {order.lastName}
           </p>
           <p className="text-sm text-stone-500 mt-1">{order.email}</p>
@@ -219,20 +307,36 @@ export function OrderTracker({ orderId }: OrderTrackerProps) {
         </div>
       </motion.div>
 
-      {/* Comment */}
+      {/* ─── Comment ─── */}
       {order.comment && (
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, type: "spring", stiffness: 300, damping: 30 }}
-          className="mt-4 bg-white rounded-2xl shadow-soft p-5"
+          {...stagger(2)}
+          className="bg-white rounded-2xl shadow-soft p-5 mb-4"
         >
-          <h3 className="font-jakarta font-bold text-[10px] uppercase tracking-[0.08em] text-stone-400 mb-2">
-            Коментар
-          </h3>
-          <p className="text-sm text-stone-600">{order.comment}</p>
+          <div className="flex items-center gap-2.5 mb-2">
+            <span className="text-stone-400"><IconMessage /></span>
+            <h3 className="label-section">
+              Коментар
+            </h3>
+          </div>
+          <p className="text-sm text-stone-600 leading-relaxed">{order.comment}</p>
         </motion.div>
       )}
-    </motion.div>
+
+      {/* ─── Back link ─── */}
+      <motion.div
+        {...stagger(3)}
+        className="flex justify-center pt-6"
+      >
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-stone-400 hover:text-stone-900 transition-colors duration-200"
+        >
+          <IconArrowLeft />
+          <span className="font-jakarta font-medium">Повернутися до магазину</span>
+        </Link>
+      </motion.div>
+    </div>
+    </div>
   );
 }

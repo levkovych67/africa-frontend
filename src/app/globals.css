@@ -10,6 +10,34 @@ body {
   color: #1C1917;
 }
 
+/* ─── Reusable component patterns ─── */
+@layer components {
+  /* Snap-scroll carousel container (used in product cards, galleries, overlays) */
+  .snap-carousel {
+    @apply absolute inset-0 flex overflow-x-auto snap-x snap-mandatory;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  /* Form input base (used in checkout, shipping, contact forms) */
+  .input-base {
+    @apply w-full py-3 px-4 bg-white border border-stone-200 rounded-xl outline-none
+      focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10
+      placeholder:text-stone-400 transition-all duration-200;
+  }
+
+  /* Section label (used across filters, checkout steps, order tracker) */
+  .label-section {
+    @apply font-jakarta font-bold text-[10px] uppercase tracking-[0.08em] text-stone-400;
+  }
+
+  /* Scrollbar-hidden utility */
+  .scrollbar-none {
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+}
+
 @keyframes cart-pulse {
   0% { transform: scale(1); opacity: 1; }
   40% { transform: scale(1.2); opacity: 0.7; }

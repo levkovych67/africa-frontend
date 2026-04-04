@@ -5,6 +5,7 @@ import Image from "next/image";
 import { CartItem } from "@/store/cart";
 import { PaymentMethod } from "@/types/order";
 import { formatPrice } from "@/lib/utils/price";
+import { cn } from "@/lib/cn";
 import { PrecisionButton } from "@/components/ui/precision-button";
 import { OrderSummary } from "./order-summary";
 
@@ -63,25 +64,20 @@ function PaymentCard({
       onClick={onSelect}
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.985 }}
-      className={`
-        relative w-full text-left p-5 rounded-2xl border-2 transition-colors duration-300
-        ${
-          selected
-            ? "border-stone-900 bg-white shadow-soft"
-            : "border-stone-200/70 bg-white/60 hover:border-stone-300"
-        }
-      `}
+      className={cn(
+        "relative w-full text-left p-5 rounded-2xl border-2 transition-colors duration-300",
+        selected ? "border-stone-900 bg-white shadow-soft" : "border-stone-200/70 bg-white/60 hover:border-stone-300"
+      )}
     >
       {/* Selection indicator */}
       <div className="flex items-start gap-4">
         {/* Radio dot */}
         <div className="mt-0.5 relative flex-shrink-0">
           <div
-            className={`
-              w-5 h-5 rounded-full border-2 transition-colors duration-300
-              flex items-center justify-center
-              ${selected ? "border-stone-900" : "border-stone-300"}
-            `}
+            className={cn(
+              "w-5 h-5 rounded-full border-2 transition-colors duration-300 flex items-center justify-center",
+              selected ? "border-stone-900" : "border-stone-300"
+            )}
           >
             <AnimatePresence>
               {selected && (
@@ -103,10 +99,10 @@ function PaymentCard({
 
         {/* Icon */}
         <div
-          className={`
-            flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-colors duration-300
-            ${selected ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-500"}
-          `}
+          className={cn(
+            "flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-colors duration-300",
+            selected ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-500"
+          )}
         >
           {icon}
         </div>
@@ -115,10 +111,10 @@ function PaymentCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span
-              className={`
-                text-sm font-jakarta font-semibold transition-colors duration-300
-                ${selected ? "text-stone-900" : "text-stone-700"}
-              `}
+              className={cn(
+                "text-sm font-jakarta font-semibold transition-colors duration-300",
+                selected ? "text-stone-900" : "text-stone-700"
+              )}
             >
               {title}
             </span>
@@ -175,7 +171,7 @@ export function StepPayment({
       </div>
 
       {/* Payment method label */}
-      <p className="font-jakarta font-bold text-[10px] uppercase tracking-[0.08em] text-stone-400 mb-3">
+      <p className="label-section mb-3">
         Спосіб оплати
       </p>
 
@@ -229,9 +225,7 @@ export function StepPayment({
                 alt="Monobank"
                 width={22}
                 height={22}
-                className={`transition-all duration-300 ${
-                  paymentMethod === "ONLINE" ? "brightness-0 invert" : ""
-                }`}
+                className={cn("transition-all duration-300", paymentMethod === "ONLINE" && "brightness-0 invert")}
               />
             }
             title="Оплатити онлайн"

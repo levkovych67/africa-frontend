@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
+import { cn } from "@/lib/cn";
 
 function isImageUrl(url: string): boolean {
   return !url.endsWith(".mp4") && !url.endsWith(".webm") && !url.endsWith(".mov");
@@ -66,7 +67,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
           <div
             ref={mobileScrollRef}
             onScroll={handleMobileScroll}
-            className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="snap-carousel"
           >
             {filtered.map((src, i) => (
               <div key={i} className="w-full flex-none snap-center relative">
@@ -98,7 +99,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
           <div
             ref={desktopScrollRef}
             onScroll={handleDesktopScroll}
-            className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="snap-carousel"
           >
             {filtered.map((src, i) => (
               <div key={i} className="min-w-full snap-center relative">
@@ -121,9 +122,10 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
               <button
                 type="button"
                 onClick={() => scrollTo(Math.max(0, activeIndex - 1))}
-                className={`absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full shadow-soft font-sans text-sm ${
+                className={cn(
+                  "absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full shadow-soft font-sans text-sm",
                   activeIndex === 0 ? "opacity-20 cursor-default" : "hover:bg-white hover:shadow-lift"
-                }`}
+                )}
                 disabled={activeIndex === 0}
               >
                 ←
@@ -133,11 +135,10 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
                 onClick={() =>
                   scrollTo(Math.min(filtered.length - 1, activeIndex + 1))
                 }
-                className={`absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full shadow-soft font-sans text-sm ${
-                  activeIndex === filtered.length - 1
-                    ? "opacity-20 cursor-default"
-                    : "hover:bg-white hover:shadow-lift"
-                }`}
+                className={cn(
+                  "absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full shadow-soft font-sans text-sm",
+                  activeIndex === filtered.length - 1 ? "opacity-20 cursor-default" : "hover:bg-white hover:shadow-lift"
+                )}
                 disabled={activeIndex === filtered.length - 1}
               >
                 →
@@ -155,15 +156,13 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
 
         {/* Thumbnail strip — desktop only */}
         {filtered.length > 1 && (
-          <div className="flex gap-2 mt-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-none">
             {filtered.map((src, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => scrollTo(i)}
-                className={`relative shrink-0 w-20 h-20 rounded-lg overflow-hidden ${
-                  i === activeIndex ? "opacity-100" : "opacity-40"
-                }`}
+                className={cn("relative shrink-0 w-20 h-20 rounded-lg overflow-hidden", i === activeIndex ? "opacity-100" : "opacity-40")}
               >
                 <Image
                   src={src}

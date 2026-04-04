@@ -8,6 +8,7 @@ import {
   animate,
 } from "framer-motion";
 import Image from "next/image";
+import { cn } from "@/lib/cn";
 import { useProduct } from "@/hooks/use-products";
 import { CommandCenter } from "./command-center";
 
@@ -62,7 +63,7 @@ function OverlayGallery({
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="snap-carousel"
         >
           {filtered.map((src, i) => (
             <div key={i} className="w-full flex-none snap-center relative">
@@ -85,18 +86,20 @@ function OverlayGallery({
             <button
               type="button"
               onClick={() => scrollTo(Math.max(0, activeIndex - 1))}
-              className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full text-xs transition-opacity ${
+              className={cn(
+                "absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full text-xs transition-opacity",
                 activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-white"
-              }`}
+              )}
             >
               ←
             </button>
             <button
               type="button"
               onClick={() => scrollTo(Math.min(filtered.length - 1, activeIndex + 1))}
-              className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full text-xs transition-opacity ${
+              className={cn(
+                "absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full text-xs transition-opacity",
                 activeIndex === filtered.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-white"
-              }`}
+              )}
             >
               →
             </button>
@@ -112,9 +115,10 @@ function OverlayGallery({
               key={i}
               type="button"
               onClick={() => scrollTo(i)}
-              className={`relative shrink-0 w-14 h-14 rounded-lg overflow-hidden transition-opacity duration-200 ${
+              className={cn(
+                "relative shrink-0 w-14 h-14 rounded-lg overflow-hidden transition-opacity duration-200",
                 i === activeIndex ? "opacity-100 ring-2 ring-stone-900" : "opacity-50 hover:opacity-80"
-              }`}
+              )}
             >
               <Image
                 src={src}
@@ -414,7 +418,7 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
               ref={scrollRef}
               onScroll={checkBottom}
               style={{ y: cardY }}
-              className="h-full overflow-y-auto overscroll-none pointer-events-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="h-full overflow-y-auto overscroll-none pointer-events-auto scrollbar-none"
             >
               <div className="h-4" />
               <div className="px-4 pb-4">

@@ -2,10 +2,15 @@
 
 import { useState, useMemo } from "react";
 import { useProducts } from "@/hooks/use-products";
+import dynamic from "next/dynamic";
 import { ProductCard } from "@/components/product/product-card";
 import { ProductGrid, ProductGridItem } from "@/components/product/product-grid";
-import { ProductOverlay } from "@/components/product/product-overlay";
 import { ProductFilters, ActiveFilters } from "@/components/product/product-filters";
+
+const ProductOverlay = dynamic(
+  () => import("@/components/product/product-overlay").then(m => m.ProductOverlay),
+  { ssr: false }
+);
 import { Product } from "@/types/product";
 
 function filterByAttributes(

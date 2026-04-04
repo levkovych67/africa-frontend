@@ -71,6 +71,20 @@ export interface DashboardStats {
   revenueByDay: RevenueByDay[];
 }
 
+// Admin users
+export interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface CreateAdminPayload {
+  email: string;
+  password: string;
+  name: string;
+}
+
 // Image upload
 export interface PresignResponse {
   uploadUrl: string;
