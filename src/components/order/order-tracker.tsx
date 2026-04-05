@@ -73,15 +73,7 @@ function OrderSkeleton() {
   );
 }
 
-/* ─── Status badge config ─── */
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: string }> = {
-  WAITING_PAYMENT: { label: "Очікує оплати", color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200/40", icon: "⏳" },
-  PENDING: { label: "Обробляється", color: "text-stone-600", bg: "bg-stone-50", border: "border-stone-200/40", icon: "📋" },
-  CONFIRMED: { label: "Підтверджено", color: "text-emerald", bg: "bg-emerald/5", border: "border-emerald/15", icon: "✓" },
-  SHIPPED: { label: "Відправлено", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200/40", icon: "🚚" },
-  DELIVERED: { label: "Доставлено", color: "text-emerald", bg: "bg-emerald/5", border: "border-emerald/15", icon: "✅" },
-  CANCELLED: { label: "Скасовано", color: "text-coral", bg: "bg-coral/5", border: "border-coral/15", icon: "✕" },
-};
+
 
 /* ─── Stagger animation helpers ─── */
 const stagger = (i: number) => ({
@@ -120,7 +112,6 @@ export function OrderTracker({ orderId }: OrderTrackerProps) {
     );
   }
 
-  const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.PENDING;
 
   return (
     <div className="bg-pearl pb-12 md:pb-16 min-h-[calc(100vh-64px)]">
@@ -188,7 +179,7 @@ export function OrderTracker({ orderId }: OrderTrackerProps) {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35, type: "spring", stiffness: 300, damping: 30 }}
-          className="flex items-center gap-3"
+          className="flex items-center gap-3 text-stone-800"
         >
           <span className="font-grotesk text-sm text-stone-400 tracking-wide">
             #{orderId.slice(0, 8)}…
@@ -203,17 +194,7 @@ export function OrderTracker({ orderId }: OrderTrackerProps) {
           </span>
         </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.45, type: "spring", stiffness: 300, damping: 25 }}
-            className={`mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border shadow-sm backdrop-blur-sm bg-white/90 ${cfg.border}`}
-          >
-            <span className="text-sm">{cfg.icon}</span>
-            <span className={`font-jakarta font-semibold text-xs uppercase tracking-wider ${cfg.color}`}>
-              {cfg.label}
-            </span>
-          </motion.div>
+         
         </motion.div>
       </div>
 

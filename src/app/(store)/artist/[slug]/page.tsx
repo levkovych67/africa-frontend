@@ -58,28 +58,27 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
 export default async function ArtistPage({ params }: ArtistPageProps) {
   const { slug } = await params;
 
-  let jsonLdElements = null;
+  let artist = null;
   try {
-    const artist = await getArtist(slug);
-    jsonLdElements = (
-      <>
-        <JsonLd data={artistJsonLd(artist)} />
-        <JsonLd
-          data={breadcrumbJsonLd([
-            { name: "Головна", url: SITE_URL },
-            { name: "Артисти", url: SITE_URL },
-            { name: artist.name },
-          ])}
-        />
-      </>
-    );
+    artist = await getArtist(slug);
   } catch {
     // API unavailable — skip JSON-LD
   }
 
   return (
     <>
-      {jsonLdElements}
+      {artist && (
+        <>
+          <JsonLd data={artistJsonLd(artist)} />
+          <JsonLd
+            data={breadcrumbJsonLd([
+              { name: "Головна", url: SITE_URL },
+              { name: "Артисти", url: SITE_URL },
+              { name: artist.name },
+            ])}
+          />
+        </>
+      )}
       <PageTransition>
         <main>
           <ArtistDetail slug={slug} />

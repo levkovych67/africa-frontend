@@ -2,7 +2,7 @@ import type { Product } from "@/types/product";
 import type { Artist } from "@/types/artist";
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://africa-shop.com.ua";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://africaua.store";
 export const SITE_NAME = "AFRICA SHOP";
 export const SITE_DESCRIPTION =
   "AFRICA SHOP — офіційний мерч-магазин бренду AFRICA. Колекція 2026, обмежений тираж. Футболки, худі та аксесуари від українських артистів.";

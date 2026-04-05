@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { getProducts } from "@/lib/api/products";
 import { getArtists } from "@/lib/api/artists";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://africa-shop.com.ua";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://africaua.store";
 
 export const revalidate = 3600;
 
