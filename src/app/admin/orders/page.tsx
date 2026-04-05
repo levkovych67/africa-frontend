@@ -111,6 +111,9 @@ export default function AdminOrdersPage() {
                     Статус
                   </th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">
+                    Оплата
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-500">
                     Доставка
                   </th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">
@@ -140,6 +143,19 @@ export default function AdminOrdersPage() {
                         {STATUS_LABELS[order.status] || order.status}
                       </span>
                     </td>
+                    <td className="px-4 py-3">
+                      {order.paymentMethod === "ONLINE" && order.status !== "WAITING_PAYMENT" ? (
+                        <span className="inline-block px-2 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-800">
+                          Оплачено
+                        </span>
+                      ) : order.paymentMethod === "ONLINE" ? (
+                        <span className="inline-block px-2 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-800">
+                          Очікує
+                        </span>
+                      ) : (
+                        <span className="text-gray-500 text-xs">Накладний</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-gray-600">
                       {order.shippingDetails.city},{" "}
                       {order.shippingDetails.warehouseDescription}
@@ -152,7 +168,7 @@ export default function AdminOrdersPage() {
                 {data.content.length === 0 && (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       className="px-4 py-8 text-center text-gray-500"
                     >
                       Замовлень не знайдено

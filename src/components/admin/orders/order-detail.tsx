@@ -216,11 +216,18 @@ export function OrderDetail({ order }: { order: AdminOrder }) {
           </h2>
           <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
         </div>
-        <span
-          className={`px-3 py-1 rounded-md text-sm font-medium ${STATUS_BADGE[order.status]}`}
-        >
-          {STATUS_LABELS[order.status]}
-        </span>
+        <div className="flex items-center gap-2">
+          {order.paymentMethod === "ONLINE" && order.status !== "WAITING_PAYMENT" && (
+            <span className="px-3 py-1 rounded-md text-sm font-medium bg-emerald-100 text-emerald-800">
+              Оплачено
+            </span>
+          )}
+          <span
+            className={`px-3 py-1 rounded-md text-sm font-medium ${STATUS_BADGE[order.status]}`}
+          >
+            {STATUS_LABELS[order.status]}
+          </span>
+        </div>
       </div>
 
       {/* Customer info */}
@@ -242,6 +249,12 @@ export function OrderDetail({ order }: { order: AdminOrder }) {
           <div>
             <span className="text-gray-500">Телефон:</span>{" "}
             <span className="text-gray-900">{order.phone}</span>
+          </div>
+          <div>
+            <span className="text-gray-500">Оплата:</span>{" "}
+            <span className="text-gray-900">
+              {order.paymentMethod === "ONLINE" ? "Онлайн (Monobank)" : "При отриманні"}
+            </span>
           </div>
         </div>
       </div>

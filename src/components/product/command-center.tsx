@@ -57,7 +57,7 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
   const allVariantsOutOfStock = product.variants.every((v) => v.stock === 0);
 
   return (
-    <div className={compact ? "" : "sticky top-8 p-6 lg:p-8"}>
+    <div className={compact ? "bg-white/70 backdrop-blur-md rounded-2xl p-5" : "sticky top-8 p-6 lg:p-8 bg-white/70 backdrop-blur-md rounded-2xl"}>
       <h1 className="text-h2-section font-jakarta font-bold">
         {product.title}
       </h1>

@@ -38,6 +38,7 @@ export interface AdminOrder {
     trackingNumber: string | null;
   };
   comment: string | null;
+  paymentMethod: "COD" | "ONLINE";
   createdAt: string;
   updatedAt: string | null;
 }

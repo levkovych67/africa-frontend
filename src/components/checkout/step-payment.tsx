@@ -31,10 +31,9 @@ function NovaPoshtaIcon({ className }: { className?: string }) {
       strokeLinejoin="round"
       className={className}
     >
-      <rect x="2" y="7" width="20" height="14" rx="2" />
-      <path d="M16 7V5a4 4 0 0 0-8 0v2" />
-      <circle cx="12" cy="15" r="2" />
-      <path d="M8 7h8" />
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+      <line x1="12" y1="22.08" x2="12" y2="12" />
     </svg>
   );
 }
@@ -70,9 +69,9 @@ function PaymentCard({
       )}
     >
       {/* Selection indicator */}
-      <div className="flex items-start gap-4">
+      <div className="flex items-center gap-4">
         {/* Radio dot */}
-        <div className="mt-0.5 relative flex-shrink-0">
+        <div className="relative flex-shrink-0">
           <div
             className={cn(
               "w-5 h-5 rounded-full border-2 transition-colors duration-300 flex items-center justify-center",
@@ -223,8 +222,8 @@ export function StepPayment({
               <Image
                 src="/images/monobank.svg"
                 alt="Monobank"
-                width={22}
-                height={22}
+                width={34}
+                height={34}
                 className={cn("transition-all duration-300", paymentMethod === "ONLINE" && "brightness-0 invert")}
               />
             }

@@ -26,17 +26,7 @@ export default function CheckoutPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-stone-900/60 via-transparent to-stone-900/90" />
           
-          <div className="relative z-10">
-            <Link href="/" className="inline-block hover:opacity-80 transition-opacity">
-              <Image
-                src="/images/new logo.webp"
-                alt="AFRICA SHOP"
-                width={120}
-                height={40}
-                className="h-7 lg:h-9 w-auto brightness-0 invert"
-              />
-            </Link>
-          </div>
+          
           
           <div className="relative z-10 hidden lg:block mt-auto">
             <h2 className="font-jakarta font-bold text-3xl xl:text-4xl text-white tracking-tight leading-tight mb-3">

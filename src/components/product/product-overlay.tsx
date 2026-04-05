@@ -59,11 +59,20 @@ function OverlayGallery({
   return (
     <div className="flex flex-col gap-2">
       {/* Main image */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-stone-100 rounded-2xl">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl">
+        {/* Zebra background */}
+        <Image
+          src="/images/zebra.webp"
+          alt=""
+          fill
+          className="object-cover"
+          sizes="(min-width: 768px) 45vw, 85vw"
+          aria-hidden="true"
+        />
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="snap-carousel"
+          className="snap-carousel relative z-[1]"
         >
           {filtered.map((src, i) => (
             <div key={i} className="w-full flex-none snap-center relative">
