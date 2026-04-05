@@ -114,7 +114,8 @@ export function CheckoutForm() {
 
       if (paymentMethod === "ONLINE") {
         try {
-          const { paymentUrl } = await createPayment(order.id);
+          const redirectUrl = `${window.location.origin}/order/${order.id}?accessToken=${order.accessToken}`;
+          const { paymentUrl } = await createPayment(order.id, order.accessToken!, redirectUrl);
           clearCart();
           window.location.href = paymentUrl;
         } catch {
