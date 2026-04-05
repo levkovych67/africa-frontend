@@ -35,6 +35,9 @@ export function ProductForm({ product }: ProductFormProps) {
 
   // Form state
   const [title, setTitle] = useState(product?.title || "");
+  const [slug, setSlug] = useState(product?.slug || "");
+  const [slugEditable, setSlugEditable] = useState(!isEdit);
+  const [slugError, setSlugError] = useState("");
   const [description, setDescription] = useState(product?.description || "");
   const [basePrice, setBasePrice] = useState(product?.basePrice || 0);
   const [artistId, setArtistId] = useState(product?.artistId || "");
@@ -64,6 +67,51 @@ export function ProductForm({ product }: ProductFormProps) {
   const imageUpload = useImageUpload();
   const { data: artistsData } = useAdminArtists({ size: 100 });
 
+  const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+  const UA_TRANSLIT: Record<string, string> = {
+    а: "a", б: "b", в: "v", г: "h", ґ: "g", д: "d", е: "e", є: "ye",
+    ж: "zh", з: "z", и: "y", і: "i", ї: "yi", й: "y", к: "k", л: "l",
+    м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u",
+    ф: "f", х: "kh", ц: "ts", ч: "ch", ш: "sh", щ: "shch", ь: "",
+    ю: "yu", я: "ya",
+  };
+
+  const transliterate = (text: string): string =>
+    text
+      .toLowerCase()
+      .split("")
+      .map((ch) => UA_TRANSLIT[ch] ?? ch)
+      .join("")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+  const validateSlug = (value: string) => {
+    if (!value) {
+      setSlugError("");
+      return true;
+    }
+    if (!SLUG_REGEX.test(value)) {
+      setSlugError("Тільки a-z, 0-9 та дефіс. Без пробілів та кирилиці.");
+      return false;
+    }
+    setSlugError("");
+    return true;
+  };
+
+  const handleSlugChange = (value: string) => {
+    const normalized = value.toLowerCase().replace(/\s+/g, "-");
+    setSlug(normalized);
+    validateSlug(normalized);
+  };
+
+  const generateSlug = () => {
+    const generated = transliterate(title);
+    setSlug(generated);
+    setSlugError("");
+    if (isEdit) setSlugEditable(true);
+  };
+
   const parseAttributes = () =>
     attributes
       .filter((a) => a.type.trim())
@@ -92,17 +140,25 @@ export function ProductForm({ product }: ProductFormProps) {
 
   const buildPayload = () => ({
     title,
+    slug: slug || undefined,
     description: description || undefined,
     basePrice,
     artistId: artistId || undefined,
     images,
     attributes: parseAttributes(),
     variants: parseVariants(),
+    ...(isEdit && product?.status && product.status !== "ARCHIVED"
+      ? { status: product.status }
+      : {}),
   });
 
   const handleSave = async () => {
     if (!title.trim() || basePrice <= 0) {
       window.alert("Заповніть назву та ціну");
+      return;
+    }
+    if (slug && !validateSlug(slug)) {
+      window.alert("Невалідний slug. Тільки a-z, 0-9 та дефіс.");
       return;
     }
 
@@ -126,6 +182,10 @@ export function ProductForm({ product }: ProductFormProps) {
   const handlePublish = async () => {
     if (!title.trim() || basePrice <= 0) {
       window.alert("Заповніть назву та ціну");
+      return;
+    }
+    if (slug && !validateSlug(slug)) {
+      window.alert("Невалідний slug. Тільки a-z, 0-9 та дефіс.");
       return;
     }
 
@@ -204,6 +264,52 @@ export function ProductForm({ product }: ProductFormProps) {
             required
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Slug (URL)
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={slug}
+              onChange={(e) => handleSlugChange(e.target.value)}
+              readOnly={isEdit && !slugEditable}
+              placeholder="khudi-palindrom-ya-zalyshayus-tut"
+              className={`flex-1 border rounded-lg px-3 py-2 text-sm outline-none ${
+                slugError
+                  ? "border-red-400 focus:ring-2 focus:ring-red-400"
+                  : "border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              } ${isEdit && !slugEditable ? "bg-gray-50 text-gray-500" : ""}`}
+            />
+            {isEdit && !slugEditable ? (
+              <button
+                type="button"
+                onClick={() => setSlugEditable(true)}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap"
+              >
+                Змінити
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={generateSlug}
+                disabled={!title.trim()}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 whitespace-nowrap"
+              >
+                Згенерувати
+              </button>
+            )}
+          </div>
+          {slugError && (
+            <p className="mt-1 text-xs text-red-500">{slugError}</p>
+          )}
+          {!slug && (
+            <p className="mt-1 text-xs text-gray-400">
+              Залиште порожнім — бекенд згенерує автоматично
+            </p>
+          )}
         </div>
 
         <div>

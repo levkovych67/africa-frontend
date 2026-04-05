@@ -72,7 +72,7 @@ export function ProductCard({ product, priority = false, onExpand }: ProductCard
 
   return (
     <Link
-      href={`/product/${product.slug}`}
+      href={product.slug ? `/product/${product.slug}` : "#"}
       onClick={(e) => {
         if (onExpand) {
           e.preventDefault();

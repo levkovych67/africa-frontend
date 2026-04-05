@@ -28,6 +28,7 @@ export async function getAdminProduct(id: string): Promise<Product> {
 
 export interface CreateProductPayload {
   title: string;
+  slug?: string;
   description?: string;
   basePrice: number;
   artistId?: string;
