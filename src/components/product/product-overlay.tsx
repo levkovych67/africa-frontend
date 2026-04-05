@@ -59,20 +59,11 @@ function OverlayGallery({
   return (
     <div className="flex flex-col gap-2">
       {/* Main image */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl">
-        {/* Zebra background */}
-        <Image
-          src="/images/zebra.webp"
-          alt=""
-          fill
-          className="object-cover"
-          sizes="(min-width: 768px) 45vw, 85vw"
-          aria-hidden="true"
-        />
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-stone-100 rounded-2xl">
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="snap-carousel relative z-[1]"
+          className="snap-carousel"
         >
           {filtered.map((src, i) => (
             <div key={i} className="w-full flex-none snap-center relative">
@@ -441,32 +432,43 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
                     ✕
                   </button>
 
-                  <div className="p-5 md:p-6">
-                    {isLoading || !product ? (
-                      <div className="space-y-4">
-                        <div className="aspect-[3/4] bg-stone-100 rounded-2xl animate-pulse" />
-                        <div className="h-6 w-3/4 bg-stone-100 rounded-xl animate-pulse" />
-                        <div className="h-5 w-1/4 bg-stone-100 rounded-xl animate-pulse" />
-                        <div className="grid grid-cols-4 gap-2">
-                          {Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="h-12 bg-stone-100 rounded-xl animate-pulse" />
-                          ))}
+                  <div className="p-5 md:p-6 relative">
+                    {/* Zebra background */}
+                    <Image
+                      src="/images/zebra.webp"
+                      alt=""
+                      fill
+                      className="object-cover rounded-3xl"
+                      sizes="100vw"
+                      aria-hidden="true"
+                    />
+                    <div className="relative z-[1]">
+                      {isLoading || !product ? (
+                        <div className="space-y-4">
+                          <div className="aspect-[3/4] bg-stone-100 rounded-2xl animate-pulse" />
+                          <div className="h-6 w-3/4 bg-stone-100 rounded-xl animate-pulse" />
+                          <div className="h-5 w-1/4 bg-stone-100 rounded-xl animate-pulse" />
+                          <div className="grid grid-cols-4 gap-2">
+                            {Array.from({ length: 4 }).map((_, i) => (
+                              <div key={i} className="h-12 bg-stone-100 rounded-xl animate-pulse" />
+                            ))}
+                          </div>
+                          <div className="h-12 bg-stone-100 rounded-xl animate-pulse" />
                         </div>
-                        <div className="h-12 bg-stone-100 rounded-xl animate-pulse" />
-                      </div>
-                    ) : (
-                      <div className="md:grid md:grid-cols-2 md:gap-6">
-                        {/* Left — gallery */}
-                        <div>
-                          <OverlayGallery images={product.images} title={product.title} />
-                        </div>
+                      ) : (
+                        <div className="md:grid md:grid-cols-2 md:gap-6">
+                          {/* Left — gallery */}
+                          <div>
+                            <OverlayGallery images={product.images} title={product.title} />
+                          </div>
 
-                        {/* Right — product info */}
-                        <div className="mt-4 md:mt-0">
-                          <CommandCenter product={product} compact />
+                          {/* Right — product info */}
+                          <div className="mt-4 md:mt-0">
+                            <CommandCenter product={product} compact />
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
