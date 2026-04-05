@@ -9,7 +9,7 @@ export function Footer() {
           {/* Logo + description */}
           <div className="max-w-xs">
             <Image
-              src="/images/new logo.webp"
+              src="/images/new-logo.webp"
               alt="AFRICA SHOP"
               width={140}
               height={48}

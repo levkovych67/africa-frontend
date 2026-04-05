@@ -168,7 +168,7 @@ No visible grid lines — cards float via shadows.
 | Background  | `bg-white/70 backdrop-blur-md` (frosted glass)                          |
 | Border      | `border-b border-stone-200/30`                                          |
 | Padding     | `px-6` mobile, `px-12` desktop                                          |
-| Logo        | `/images/new logo.webp`, `h-8 w-auto`                                   |
+| Logo        | `/images/new-logo.webp`, `h-8 w-auto`                                   |
 | Cart button | `font-jakarta font-bold text-xs uppercase tracking-wider`               |
 | Cart pulse  | On item add: `scale [1, 1.2, 1]` + `opacity [1, 0.7, 1]`, 400ms easeOut |
 
@@ -187,7 +187,7 @@ No visible grid lines — cards float via shadows.
 | Property       | Value                                                                   |
 | -------------- | ----------------------------------------------------------------------- |
 | Position       | `sticky top-0 z-0 h-screen`                                             |
-| Desktop image  | `/images/pc hero.webp.png`, `object-cover`                              |
+| Desktop image  | `/images/pc-hero.webp.png`, `object-cover`                              |
 | Mobile image   | `/images/phone.webp`, `object-cover`, `loading="eager"`                 |
 | Logo overlay   | Centered, `60vw` mobile / `50vw` desktop, `brightness-0 invert` (white) |
 | Scroll blur    | `0px → 12px` over 0–500px scroll                                        |
@@ -495,8 +495,8 @@ No icon library. All icons are text characters:
 
 | Path                               | Description                                               |
 | ---------------------------------- | --------------------------------------------------------- |
-| `/images/new logo.webp`            | AFRICA logo — geometric polygonal Africa continent + text |
-| `/images/pc hero.webp.png`         | Desktop hero background                                   |
+| `/images/new-logo.webp`            | AFRICA logo — geometric polygonal Africa continent + text |
+| `/images/pc-hero.webp.png`         | Desktop hero background                                   |
 | `/images/phone.webp`               | Mobile hero background                                    |
 | `/images/leopard_pc_navbar.png`    | Leopard pattern (desktop, unused currently)               |
 | `/images/leopard_phone_navbar.png` | Leopard pattern (mobile, unused currently)                |

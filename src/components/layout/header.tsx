@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/store/cart";
 
-const subscribe = () => () => {};
+const subscribe = () => () => { };
 const getSnapshot = () => true;
 const getServerSnapshot = () => false;
 
@@ -34,7 +34,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full bg-white/70 backdrop-blur-md h-16 px-6 md:px-12 flex justify-between items-center border-b border-stone-200/30">
       <Link href="/" className="flex items-center gap-3">
         <Image
-          src="/images/new logo.webp"
+          src="/images/new-logo.webp"
           alt="AFRICA SHOP"
           width={120}
           height={40}

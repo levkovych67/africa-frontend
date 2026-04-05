@@ -22,7 +22,7 @@ export function HeroSection() {
         style={{ filter: filterBlur, opacity: firstOpacity, willChange: "transform, opacity" }}
       >
         <Image
-          src="/images/pc hero.webp"
+          src="/images/pc-hero.webp"
           alt="КОЛЕКЦІЯ 2026"
           fill
           priority
@@ -39,7 +39,7 @@ export function HeroSection() {
         />
         <div className="absolute inset-0 z-10 flex items-center justify-center">
           <Image
-            src="/images/new logo.webp"
+            src="/images/new-logo.webp"
             alt="AFRICA"
             width={500}
             height={500}
