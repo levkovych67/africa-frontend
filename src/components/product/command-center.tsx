@@ -28,21 +28,24 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
   const hasAttributes = attributes.length > 0;
 
   const resolvedVariant = findVariant(variants, selectedAttributes);
-  const price = resolvedVariant
-    ? product.basePrice + resolvedVariant.priceModifier
+  // If product has variants but no attribute selectors, auto-resolve to first variant
+  const effectiveVariant = resolvedVariant
+    ?? (hasVariants && !hasAttributes ? variants[0] : null);
+
+  const price = effectiveVariant
+    ? product.basePrice + effectiveVariant.priceModifier
     : product.basePrice;
 
-  // Simple product (no variants): always in stock
-  // Product with variants: check resolved variant stock
+  // No variants = not purchasable (no stock tracking)
   const isInStock = hasVariants
-    ? (resolvedVariant ? resolvedVariant.stock > 0 : false)
-    : true;
+    ? (effectiveVariant ? effectiveVariant.stock > 0 : false)
+    : false;
 
   const allSelected = hasAttributes
     ? attributes.every((attr) => selectedAttributes[attr.type])
     : true;
 
-  const canAddToCart = hasVariants ? (allSelected && isInStock) : true;
+  const canAddToCart = hasVariants ? (allSelected && isInStock) : false;
 
   const handleSelect = (type: string, value: string) => {
     setSelectedAttributes((prev) => ({ ...prev, [type]: value }));
@@ -60,34 +63,21 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
   };
 
   const handleAddToCart = () => {
-    if (hasVariants) {
-      if (!resolvedVariant || !allSelected) return;
+    if (!effectiveVariant || !allSelected) return;
 
-      const variantLabel = Object.entries(resolvedVariant.attributes)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join(", ");
+    const variantLabel = Object.keys(effectiveVariant.attributes).length > 0
+      ? Object.entries(effectiveVariant.attributes).map(([k, v]) => `${k}: ${v}`).join(", ")
+      : "";
 
-      addItem({
-        productId: product.id,
-        productTitle: product.title,
-        sku: resolvedVariant.sku,
-        variantLabel,
-        unitPrice: price,
-        quantity: 1,
-        image: (product.images ?? [])[0] || "",
-      });
-    } else {
-      // Simple product — no variants
-      addItem({
-        productId: product.id,
-        productTitle: product.title,
-        sku: product.slug || product.id,
-        variantLabel: "",
-        unitPrice: product.basePrice,
-        quantity: 1,
-        image: (product.images ?? [])[0] || "",
-      });
-    }
+    addItem({
+      productId: product.id,
+      productTitle: product.title,
+      sku: effectiveVariant.sku,
+      variantLabel,
+      unitPrice: price,
+      quantity: 1,
+      image: (product.images ?? [])[0] || "",
+    });
 
     openCart();
   };
@@ -136,13 +126,15 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
           disabled={!canAddToCart || allVariantsOutOfStock}
           className="w-full"
         >
-          {allVariantsOutOfStock
-            ? "Розпродано"
-            : hasVariants && !allSelected
-              ? "Оберіть варіант"
-              : hasVariants && !isInStock
-                ? "Немає в наявності"
-                : "Додати в кошик"}
+          {!hasVariants
+            ? "Немає в наявності"
+            : allVariantsOutOfStock
+              ? "Розпродано"
+              : hasVariants && !allSelected
+                ? "Оберіть варіант"
+                : hasVariants && !isInStock
+                  ? "Немає в наявності"
+                  : "Додати в кошик"}
         </PrecisionButton>
       </div>
 

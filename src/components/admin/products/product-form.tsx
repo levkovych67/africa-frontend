@@ -205,7 +205,19 @@ export function ProductForm({ product }: ProductFormProps) {
       setSlugError("Тільки a-z, 0-9 та дефіс. Без пробілів та кирилиці.");
     }
 
-    // Validate each variant row (if any variants exist)
+    // At least one variant is required
+    const filledVariants = variants.filter((v) => v.sku.trim());
+    if (filledVariants.length === 0) {
+      errs.variants = "Додайте хоча б 1 варіант";
+    }
+
+    // If more than 1 variant, attributes are required
+    if (filledVariants.length > 1 && attributes.filter((a) => a.type.trim()).length === 0) {
+      errs.variants = (errs.variants ? errs.variants + "; " : "") +
+        "При кількох варіантах потрібно додати атрибути";
+    }
+
+    // Validate each variant row
     const variantRowErrors: Record<number, { sku?: string; attributes?: string; stock?: string }> = {};
     variants.forEach((v, i) => {
       const rowErr: { sku?: string; attributes?: string; stock?: string } = {};
@@ -574,7 +586,7 @@ export function ProductForm({ product }: ProductFormProps) {
         {...(errors.variants ? { "data-error": true } : {})}
       >
         <h2 className="text-sm font-medium text-gray-900 mb-3">
-          Варіанти
+          Варіанти <span className="text-red-500">*</span>
         </h2>
 
         {errors.variants && (

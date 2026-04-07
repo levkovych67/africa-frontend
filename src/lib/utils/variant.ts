@@ -5,7 +5,9 @@ export function findVariant(
   selectedAttributes: Record<string, string>
 ): ProductVariant | null {
   const selectedKeys = Object.keys(selectedAttributes);
-  if (selectedKeys.length === 0) return null;
+  if (selectedKeys.length === 0) {
+    return variants.find((v) => Object.keys(v.attributes).length === 0) ?? null;
+  }
 
   return (
     variants.find((variant) =>
