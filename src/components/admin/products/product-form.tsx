@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Product } from "@/types/product";
@@ -28,37 +28,49 @@ interface VariantRow {
   stock: number;
 }
 
+interface ValidationErrors {
+  title?: string;
+  description?: string;
+  basePrice?: string;
+  images?: string;
+  variants?: string;
+  variantRows?: Record<number, { sku?: string; attributes?: string; stock?: string }>;
+}
+
 export function ProductForm({ product }: ProductFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isEdit = !!product;
 
-  // Form state
-  const [title, setTitle] = useState(product?.title || "");
-  const [slug, setSlug] = useState(product?.slug || "");
+  // Form state — null-safe defaults
+  const [title, setTitle] = useState(product?.title ?? "");
+  const [slug, setSlug] = useState(product?.slug ?? "");
   const [slugEditable, setSlugEditable] = useState(!isEdit);
   const [slugError, setSlugError] = useState("");
-  const [description, setDescription] = useState(product?.description || "");
-  const [basePrice, setBasePrice] = useState(product?.basePrice || 0);
-  const [artistId, setArtistId] = useState(product?.artistId || "");
-  const [images, setImages] = useState<string[]>(product?.images || []);
+  const [description, setDescription] = useState(product?.description ?? "");
+  const [basePrice, setBasePrice] = useState<number>(product?.basePrice ?? 0);
+  const [artistId, setArtistId] = useState(product?.artistId ?? "");
+  const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [attributes, setAttributes] = useState<AttributeRow[]>(
     product?.attributes?.map((a) => ({
-      type: a.type,
-      values: a.values.join(", "),
-    })) || []
+      type: a.type ?? "",
+      values: a.values?.join(", ") ?? "",
+    })) ?? []
   );
   const [variants, setVariants] = useState<VariantRow[]>(
     product?.variants?.map((v) => ({
-      sku: v.sku,
-      attributes: Object.entries(v.attributes)
-        .map(([k, val]) => `${k}: ${val}`)
-        .join(", "),
-      priceModifier: v.priceModifier,
-      stock: v.stock,
-    })) || []
+      sku: v.sku ?? "",
+      attributes: v.attributes
+        ? Object.entries(v.attributes)
+            .map(([k, val]) => `${k}: ${val}`)
+            .join(", ")
+        : "",
+      priceModifier: v.priceModifier ?? 0,
+      stock: v.stock ?? 0,
+    })) ?? []
   );
   const [uploading, setUploading] = useState(false);
+  const [errors, setErrors] = useState<ValidationErrors>({});
 
   // Hooks
   const createProduct = useCreateProduct();
@@ -134,8 +146,8 @@ export function ProductForm({ product }: ProductFormProps) {
             .map((pair) => pair.split(":").map((s) => s.trim()))
             .filter(([k, val]) => k && val)
         ),
-        priceModifier: v.priceModifier,
-        stock: v.stock,
+        priceModifier: v.priceModifier ?? 0,
+        stock: v.stock ?? 0,
       }));
 
   const buildPayload = () => ({
@@ -152,13 +164,47 @@ export function ProductForm({ product }: ProductFormProps) {
       : {}),
   });
 
-  const handleSave = async () => {
-    if (!title.trim() || basePrice <= 0) {
-      window.alert("Заповніть назву та ціну");
-      return;
+  const scrollToFirstError = useCallback(() => {
+    setTimeout(() => {
+      const firstError = document.querySelector("[data-error]");
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 50);
+  }, []);
+
+  const validate = (): ValidationErrors => {
+    const errs: ValidationErrors = {};
+
+    if (!title.trim()) errs.title = "Назва обов'язкова";
+    if (!description.trim()) errs.description = "Опис обов'язковий";
+    if (!basePrice || basePrice <= 0) errs.basePrice = "Вкажіть ціну більше 0";
+    if (images.length === 0) errs.images = "Додайте хоча б 1 зображення";
+    if (variants.length === 0) errs.variants = "Додайте хоча б 1 варіант";
+
+    if (slug && !SLUG_REGEX.test(slug)) {
+      setSlugError("Тільки a-z, 0-9 та дефіс. Без пробілів та кирилиці.");
     }
-    if (slug && !validateSlug(slug)) {
-      window.alert("Невалідний slug. Тільки a-z, 0-9 та дефіс.");
+
+    // Validate each variant row
+    const variantRowErrors: Record<number, { sku?: string; attributes?: string; stock?: string }> = {};
+    variants.forEach((v, i) => {
+      const rowErr: { sku?: string; attributes?: string; stock?: string } = {};
+      if (!v.sku.trim()) rowErr.sku = "SKU обов'язковий";
+      if (!v.attributes.trim()) rowErr.attributes = "Атрибути обов'язкові";
+      if (v.stock < 0) rowErr.stock = "Не може бути від'ємним";
+      if (Object.keys(rowErr).length > 0) variantRowErrors[i] = rowErr;
+    });
+    if (Object.keys(variantRowErrors).length > 0) errs.variantRows = variantRowErrors;
+
+    return errs;
+  };
+
+  const handleSave = async () => {
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      scrollToFirstError();
       return;
     }
 
@@ -180,12 +226,10 @@ export function ProductForm({ product }: ProductFormProps) {
   };
 
   const handlePublish = async () => {
-    if (!title.trim() || basePrice <= 0) {
-      window.alert("Заповніть назву та ціну");
-      return;
-    }
-    if (slug && !validateSlug(slug)) {
-      window.alert("Невалідний slug. Тільки a-z, 0-9 та дефіс.");
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      scrollToFirstError();
       return;
     }
 
@@ -232,6 +276,11 @@ export function ProductForm({ product }: ProductFormProps) {
     try {
       const publicUrl = await imageUpload.mutateAsync(file);
       setImages((prev) => [...prev, publicUrl]);
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.images;
+        return next;
+      });
     } catch (err) {
       window.alert(
         err instanceof Error ? err.message : "Помилка завантаження"
@@ -247,23 +296,44 @@ export function ProductForm({ product }: ProductFormProps) {
     updateProduct.isPending ||
     archiveProduct.isPending;
 
+  const inputClass = (hasError: boolean) =>
+    `w-full border rounded-lg px-3 py-2 text-sm outline-none ${
+      hasError
+        ? "border-red-500 bg-red-50 focus:ring-2 focus:ring-red-400"
+        : "border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    }`;
+
+  const variantInputClass = (hasError: boolean) =>
+    `w-full border rounded-lg px-2 py-1 text-sm outline-none ${
+      hasError
+        ? "border-red-500 bg-red-50 focus:ring-1 focus:ring-red-400"
+        : "border-gray-300 focus:ring-1 focus:ring-blue-500"
+    }`;
+
   return (
     <div className="max-w-3xl space-y-6">
       {/* Basic fields */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
         <h2 className="text-sm font-medium text-gray-900">Основна інформація</h2>
 
-        <div>
+        <div {...(errors.title ? { "data-error": true } : {})}>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Назва *
+            Назва <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            onChange={(e) => {
+              setTitle(e.target.value);
+              if (errors.title && e.target.value.trim()) {
+                setErrors((prev) => { const n = { ...prev }; delete n.title; return n; });
+              }
+            }}
+            className={inputClass(!!errors.title)}
           />
+          {errors.title && (
+            <p className="mt-1 text-xs text-red-500">{errors.title}</p>
+          )}
         </div>
 
         <div>
@@ -312,31 +382,49 @@ export function ProductForm({ product }: ProductFormProps) {
           )}
         </div>
 
-        <div>
+        <div {...(errors.description ? { "data-error": true } : {})}>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Опис
+            Опис <span className="text-red-500">*</span>
           </label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              if (errors.description && e.target.value.trim()) {
+                setErrors((prev) => { const n = { ...prev }; delete n.description; return n; });
+              }
+            }}
             rows={3}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className={inputClass(!!errors.description)}
           />
+          {errors.description && (
+            <p className="mt-1 text-xs text-red-500">{errors.description}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
+          <div {...(errors.basePrice ? { "data-error": true } : {})}>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Базова ціна (UAH) *
+              Базова ціна (UAH) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
-              min={0}
+              min={0.01}
               step={0.01}
-              value={basePrice}
-              onChange={(e) => setBasePrice(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              value={basePrice || ""}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                setBasePrice(val);
+                if (errors.basePrice && val > 0) {
+                  setErrors((prev) => { const n = { ...prev }; delete n.basePrice; return n; });
+                }
+              }}
+              placeholder="0.00"
+              className={inputClass(!!errors.basePrice)}
             />
+            {errors.basePrice && (
+              <p className="mt-1 text-xs text-red-500">{errors.basePrice}</p>
+            )}
           </div>
 
           <div>
@@ -360,8 +448,17 @@ export function ProductForm({ product }: ProductFormProps) {
       </div>
 
       {/* Images */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <h2 className="text-sm font-medium text-gray-900 mb-3">Зображення</h2>
+      <div
+        className={`bg-white border rounded-lg p-4 ${errors.images ? "border-red-500" : "border-gray-200"}`}
+        {...(errors.images ? { "data-error": true } : {})}
+      >
+        <h2 className="text-sm font-medium text-gray-900 mb-3">
+          Зображення <span className="text-red-500">*</span>
+        </h2>
+
+        {errors.images && (
+          <p className="mb-3 text-xs text-red-500">{errors.images}</p>
+        )}
 
         <div className="flex flex-wrap gap-3 mb-3">
           {images.map((url, i) => (
@@ -458,8 +555,17 @@ export function ProductForm({ product }: ProductFormProps) {
       </div>
 
       {/* Variants */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <h2 className="text-sm font-medium text-gray-900 mb-3">Варіанти</h2>
+      <div
+        className={`bg-white border rounded-lg p-4 ${errors.variants ? "border-red-500" : "border-gray-200"}`}
+        {...(errors.variants ? { "data-error": true } : {})}
+      >
+        <h2 className="text-sm font-medium text-gray-900 mb-3">
+          Варіанти <span className="text-red-500">*</span>
+        </h2>
+
+        {errors.variants && (
+          <p className="mb-3 text-xs text-red-500">{errors.variants}</p>
+        )}
 
         {variants.length > 0 && (
           <div className="overflow-x-auto mb-2">
@@ -467,105 +573,118 @@ export function ProductForm({ product }: ProductFormProps) {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="text-left px-3 py-2 font-medium text-gray-500">
-                    SKU
+                    SKU <span className="text-red-500">*</span>
                   </th>
                   <th className="text-left px-3 py-2 font-medium text-gray-500">
-                    Атрибути (ключ: значення)
+                    Атрибути <span className="text-red-500">*</span>
                   </th>
                   <th className="text-left px-3 py-2 font-medium text-gray-500">
                     Ціна +/-
                   </th>
                   <th className="text-left px-3 py-2 font-medium text-gray-500">
-                    Залишок
+                    Залишок <span className="text-red-500">*</span>
                   </th>
                   <th className="px-3 py-2"></th>
                 </tr>
               </thead>
               <tbody>
-                {variants.map((v, i) => (
-                  <tr key={i} className="border-b border-gray-100">
-                    <td className="px-3 py-2">
-                      <input
-                        type="text"
-                        value={v.sku}
-                        onChange={(e) =>
-                          setVariants((prev) =>
-                            prev.map((vr, j) =>
-                              j === i ? { ...vr, sku: e.target.value } : vr
+                {variants.map((v, i) => {
+                  const rowErr = errors.variantRows?.[i];
+                  return (
+                    <tr key={i} className="border-b border-gray-100">
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={v.sku}
+                          onChange={(e) =>
+                            setVariants((prev) =>
+                              prev.map((vr, j) =>
+                                j === i ? { ...vr, sku: e.target.value } : vr
+                              )
                             )
-                          )
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        type="text"
-                        placeholder="Розмір: M, Колір: Чорний"
-                        value={v.attributes}
-                        onChange={(e) =>
-                          setVariants((prev) =>
-                            prev.map((vr, j) =>
-                              j === i
-                                ? { ...vr, attributes: e.target.value }
-                                : vr
+                          }
+                          placeholder="ART-001-M"
+                          className={variantInputClass(!!rowErr?.sku)}
+                        />
+                        {rowErr?.sku && (
+                          <p className="mt-0.5 text-xs text-red-500">{rowErr.sku}</p>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          placeholder="Розмір: M, Колір: Чорний"
+                          value={v.attributes}
+                          onChange={(e) =>
+                            setVariants((prev) =>
+                              prev.map((vr, j) =>
+                                j === i
+                                  ? { ...vr, attributes: e.target.value }
+                                  : vr
+                              )
                             )
-                          )
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        type="number"
-                        value={v.priceModifier}
-                        onChange={(e) =>
-                          setVariants((prev) =>
-                            prev.map((vr, j) =>
-                              j === i
-                                ? {
-                                    ...vr,
-                                    priceModifier: Number(e.target.value),
-                                  }
-                                : vr
+                          }
+                          className={variantInputClass(!!rowErr?.attributes)}
+                        />
+                        {rowErr?.attributes && (
+                          <p className="mt-0.5 text-xs text-red-500">{rowErr.attributes}</p>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          value={v.priceModifier}
+                          onChange={(e) =>
+                            setVariants((prev) =>
+                              prev.map((vr, j) =>
+                                j === i
+                                  ? {
+                                      ...vr,
+                                      priceModifier: Number(e.target.value),
+                                    }
+                                  : vr
+                              )
                             )
-                          )
-                        }
-                        className="w-24 border border-gray-300 rounded-lg px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        type="number"
-                        min={0}
-                        value={v.stock}
-                        onChange={(e) =>
-                          setVariants((prev) =>
-                            prev.map((vr, j) =>
-                              j === i
-                                ? { ...vr, stock: Number(e.target.value) }
-                                : vr
+                          }
+                          className="w-24 border border-gray-300 rounded-lg px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          min={0}
+                          value={v.stock}
+                          onChange={(e) =>
+                            setVariants((prev) =>
+                              prev.map((vr, j) =>
+                                j === i
+                                  ? { ...vr, stock: Number(e.target.value) }
+                                  : vr
+                              )
                             )
-                          )
-                        }
-                        className="w-24 border border-gray-300 rounded-lg px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setVariants((prev) =>
-                            prev.filter((_, j) => j !== i)
-                          )
-                        }
-                        className="text-red-600 hover:text-red-800 text-sm"
-                      >
-                        ×
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                          }
+                          className={`w-24 ${variantInputClass(!!rowErr?.stock)}`}
+                        />
+                        {rowErr?.stock && (
+                          <p className="mt-0.5 text-xs text-red-500">{rowErr.stock}</p>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setVariants((prev) =>
+                              prev.filter((_, j) => j !== i)
+                            )
+                          }
+                          className="text-red-600 hover:text-red-800 text-sm"
+                        >
+                          ×
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
