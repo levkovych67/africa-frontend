@@ -24,14 +24,13 @@ interface AttributeRow {
 interface VariantRow {
   sku: string;
   attributes: string;
-  priceModifier: number;
+  price: number;
   stock: number;
 }
 
 interface ValidationErrors {
   title?: string;
   description?: string;
-  basePrice?: string;
   images?: string;
   variants?: string;
   variantRows?: Record<number, { sku?: string; attributes?: string; stock?: string }>;
@@ -48,7 +47,6 @@ export function ProductForm({ product }: ProductFormProps) {
   const [slugEditable, setSlugEditable] = useState(!isEdit);
   const [slugError, setSlugError] = useState("");
   const [description, setDescription] = useState(product?.description ?? "");
-  const [basePrice, setBasePrice] = useState<number>(product?.basePrice ?? 0);
   const [artistId, setArtistId] = useState(product?.artistId ?? "");
   const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [attributes, setAttributes] = useState<AttributeRow[]>(
@@ -65,7 +63,7 @@ export function ProductForm({ product }: ProductFormProps) {
             .map(([k, val]) => `${k}: ${val}`)
             .join(", ")
         : "",
-      priceModifier: v.priceModifier ?? 0,
+      price: v.price ?? 0,
       stock: v.stock ?? 0,
     })) ?? []
   );
@@ -146,7 +144,7 @@ export function ProductForm({ product }: ProductFormProps) {
             .map((pair) => pair.split(":").map((s) => s.trim()))
             .filter(([k, val]) => k && val)
         ),
-        priceModifier: v.priceModifier ?? 0,
+        price: v.price ?? 0,
         stock: v.stock ?? 0,
       }));
 
@@ -173,7 +171,6 @@ export function ProductForm({ product }: ProductFormProps) {
       title,
       slug: slug || undefined,
       description: description || undefined,
-      basePrice,
       artistId: artistId || undefined,
       images,
       attributes: parsedAttributes,
@@ -198,7 +195,6 @@ export function ProductForm({ product }: ProductFormProps) {
 
     if (!title.trim()) errs.title = "Назва обов'язкова";
     if (!description.trim()) errs.description = "Опис обов'язковий";
-    if (!basePrice || basePrice <= 0) errs.basePrice = "Вкажіть ціну більше 0";
     if (images.length === 0) errs.images = "Додайте хоча б 1 зображення";
 
     if (slug && !SLUG_REGEX.test(slug)) {
@@ -428,31 +424,7 @@ export function ProductForm({ product }: ProductFormProps) {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div {...(errors.basePrice ? { "data-error": true } : {})}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Базова ціна (UAH) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              min={0.01}
-              step={0.01}
-              value={basePrice || ""}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                setBasePrice(val);
-                if (errors.basePrice && val > 0) {
-                  setErrors((prev) => { const n = { ...prev }; delete n.basePrice; return n; });
-                }
-              }}
-              placeholder="0.00"
-              className={inputClass(!!errors.basePrice)}
-            />
-            {errors.basePrice && (
-              <p className="mt-1 text-xs text-red-500">{errors.basePrice}</p>
-            )}
-          </div>
-
+        <div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Артист
@@ -605,7 +577,7 @@ export function ProductForm({ product }: ProductFormProps) {
                     Атрибути
                   </th>
                   <th className="text-left px-3 py-2 font-medium text-gray-500">
-                    Ціна +/-
+                    Ціна (UAH)
                   </th>
                   <th className="text-left px-3 py-2 font-medium text-gray-500">
                     Залишок <span className="text-red-500">*</span>
@@ -659,14 +631,16 @@ export function ProductForm({ product }: ProductFormProps) {
                       <td className="px-3 py-2">
                         <input
                           type="number"
-                          value={v.priceModifier}
+                          min={0.01}
+                          step={0.01}
+                          value={v.price}
                           onChange={(e) =>
                             setVariants((prev) =>
                               prev.map((vr, j) =>
                                 j === i
                                   ? {
                                       ...vr,
-                                      priceModifier: Number(e.target.value),
+                                      price: Number(e.target.value),
                                     }
                                   : vr
                               )
@@ -721,7 +695,7 @@ export function ProductForm({ product }: ProductFormProps) {
           onClick={() =>
             setVariants((prev) => [
               ...prev,
-              { sku: "", attributes: "", priceModifier: 0, stock: 0 },
+              { sku: "", attributes: "", price: 0, stock: 0 },
             ])
           }
           className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"

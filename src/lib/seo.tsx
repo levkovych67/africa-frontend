@@ -45,8 +45,8 @@ export function productJsonLd(product: Product) {
   const variants = product.variants ?? [];
   const inStock = variants.some((v) => v.stock > 0);
   const prices = variants.length > 0
-    ? variants.map((v) => product.basePrice + v.priceModifier)
-    : [product.basePrice];
+    ? variants.map((v) => v.price)
+    : [product.minPrice];
   const minPrice = Math.min(...prices);
   const maxPrice = Math.max(...prices);
 

@@ -6,7 +6,7 @@ export interface ProductAttribute {
 export interface ProductVariant {
   sku: string;
   attributes: Record<string, string>;
-  priceModifier: number;
+  price: number;
   stock: number;
 }
 
@@ -15,7 +15,7 @@ export interface Product {
   slug: string;
   title: string;
   description: string;
-  basePrice: number;
+  minPrice: number;
   attributes: ProductAttribute[];
   variants: ProductVariant[];
   images: string[];

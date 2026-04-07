@@ -63,7 +63,7 @@ export function ProductCard({ product, priority = false, onExpand }: ProductCard
         <div className="bg-white rounded-b-2xl p-4">
           <div className="flex justify-between items-start">
             <h3 className="font-jakarta font-semibold text-base text-stone-900">{product.title}</h3>
-            <span className="font-grotesk text-sm text-stone-900">{formatPrice(product.basePrice)}</span>
+            <span className="font-grotesk text-sm text-stone-900">{formatPrice(product.minPrice)}</span>
           </div>
         </div>
       </div>
@@ -162,21 +162,14 @@ export function ProductCard({ product, priority = false, onExpand }: ProductCard
       <div className="bg-white rounded-b-2xl p-4">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-jakarta font-semibold text-base text-stone-900">{product.title}</h3>
+            <h3 className="font-jakarta font-semibold text-base text-stone-900 min-h-[2lh] line-clamp-2">{product.title}</h3>
             {product.artistName && (
-              <span
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  window.location.href = `/artist/${product.artistSlug}`;
-                }}
-                className="text-sm text-stone-500 hover:text-coral mt-0.5 block cursor-pointer"
-              >
+              <span className="text-sm text-stone-500 mt-0.5 block">
                 {product.artistName}
               </span>
             )}
           </div>
-          <span className="font-grotesk text-sm text-stone-900">{formatPrice(product.basePrice)}</span>
+          <span className="font-grotesk text-sm text-stone-900">{formatPrice(product.minPrice)}</span>
         </div>
       </div>
     </Link>

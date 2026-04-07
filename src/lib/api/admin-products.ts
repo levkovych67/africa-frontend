@@ -30,13 +30,12 @@ export interface CreateProductPayload {
   title: string;
   slug?: string;
   description?: string;
-  basePrice: number;
   artistId?: string;
   attributes?: { type: string; values: string[] }[];
   variants?: {
     sku: string;
     attributes: Record<string, string>;
-    priceModifier: number;
+    price: number;
     stock: number;
   }[];
   images?: string[];

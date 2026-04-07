@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Product } from "@/types/product";
 import { useCartStore } from "@/store/cart";
 import { findVariant } from "@/lib/utils/variant";
@@ -33,8 +32,8 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
     ?? (hasVariants && !hasAttributes ? variants[0] : null);
 
   const price = effectiveVariant
-    ? product.basePrice + effectiveVariant.priceModifier
-    : product.basePrice;
+    ? effectiveVariant.price
+    : product.minPrice;
 
   // No variants = not purchasable (no stock tracking)
   const isInStock = hasVariants
@@ -91,12 +90,9 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
       </h1>
 
       {product.artistName && (
-        <Link
-          href={`/artist/${product.artistSlug}`}
-          className="text-sm text-stone-500 hover:text-coral block mt-1"
-        >
+        <span className="text-sm text-stone-500 block mt-1">
           {product.artistName}
-        </Link>
+        </span>
       )}
 
       <p className="font-grotesk text-xl mt-2">{formatPrice(price)}</p>

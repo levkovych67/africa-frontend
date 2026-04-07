@@ -29,7 +29,7 @@ const makeProduct = (
   slug: id,
   title: `Product ${id}`,
   description: "",
-  basePrice: 100,
+  minPrice: 100,
   attributes: attrs,
   variants: [],
   images: [],

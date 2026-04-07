@@ -125,7 +125,7 @@ export default function AdminProductsPage() {
                       {product.artistName || "—"}
                     </td>
                     <td className="px-4 py-3 text-gray-900">
-                      {formatPrice(product.basePrice)}
+                      {formatPrice(product.minPrice)}
                     </td>
                     <td className="px-4 py-3">
                       <span
