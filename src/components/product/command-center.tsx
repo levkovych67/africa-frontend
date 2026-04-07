@@ -98,7 +98,7 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
           <SizeSelector
             key={attr.type}
             label={attr.type}
-            values={attr.values}
+            values={attr.values ?? []}
             selected={selectedAttributes[attr.type] || null}
             onSelect={(value) => handleSelect(attr.type, value)}
             unavailableValues={getUnavailableValues(attr.type)}

@@ -21,7 +21,7 @@ export function SizeSelector({
     <div className="flex flex-col gap-2">
       <span className="font-jakarta font-bold text-xs uppercase tracking-wider text-stone-500">{label}</span>
       <div className="grid grid-cols-4 gap-2">
-        {values.map((value) => {
+        {(values ?? []).map((value) => {
           const isUnavailable = unavailableValues.includes(value);
           const isSelected = selected === value;
 

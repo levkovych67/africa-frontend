@@ -150,19 +150,24 @@ export function ProductForm({ product }: ProductFormProps) {
         stock: v.stock ?? 0,
       }));
 
-  const buildPayload = () => ({
-    title,
-    slug: slug || undefined,
-    description: description || undefined,
-    basePrice,
-    artistId: artistId || undefined,
-    images,
-    attributes: parseAttributes(),
-    variants: parseVariants(),
-    ...(isEdit && product?.status && product.status !== "ARCHIVED"
-      ? { status: product.status }
-      : {}),
-  });
+  const buildPayload = () => {
+    const parsedAttributes = parseAttributes();
+    const parsedVariants = parseVariants();
+
+    return {
+      title,
+      slug: slug || undefined,
+      description: description || undefined,
+      basePrice,
+      artistId: artistId || undefined,
+      images: images.length > 0 ? images : undefined,
+      attributes: parsedAttributes.length > 0 ? parsedAttributes : undefined,
+      variants: parsedVariants.length > 0 ? parsedVariants : undefined,
+      ...(isEdit && product?.status && product.status !== "ARCHIVED"
+        ? { status: product.status }
+        : {}),
+    };
+  };
 
   const scrollToFirstError = useCallback(() => {
     setTimeout(() => {
@@ -180,18 +185,16 @@ export function ProductForm({ product }: ProductFormProps) {
     if (!description.trim()) errs.description = "Опис обов'язковий";
     if (!basePrice || basePrice <= 0) errs.basePrice = "Вкажіть ціну більше 0";
     if (images.length === 0) errs.images = "Додайте хоча б 1 зображення";
-    if (variants.length === 0) errs.variants = "Додайте хоча б 1 варіант";
 
     if (slug && !SLUG_REGEX.test(slug)) {
       setSlugError("Тільки a-z, 0-9 та дефіс. Без пробілів та кирилиці.");
     }
 
-    // Validate each variant row
+    // Validate each variant row (if any variants exist)
     const variantRowErrors: Record<number, { sku?: string; attributes?: string; stock?: string }> = {};
     variants.forEach((v, i) => {
       const rowErr: { sku?: string; attributes?: string; stock?: string } = {};
       if (!v.sku.trim()) rowErr.sku = "SKU обов'язковий";
-      if (!v.attributes.trim()) rowErr.attributes = "Атрибути обов'язкові";
       if (v.stock < 0) rowErr.stock = "Не може бути від'ємним";
       if (Object.keys(rowErr).length > 0) variantRowErrors[i] = rowErr;
     });
@@ -560,7 +563,7 @@ export function ProductForm({ product }: ProductFormProps) {
         {...(errors.variants ? { "data-error": true } : {})}
       >
         <h2 className="text-sm font-medium text-gray-900 mb-3">
-          Варіанти <span className="text-red-500">*</span>
+          Варіанти
         </h2>
 
         {errors.variants && (
@@ -576,7 +579,7 @@ export function ProductForm({ product }: ProductFormProps) {
                     SKU <span className="text-red-500">*</span>
                   </th>
                   <th className="text-left px-3 py-2 font-medium text-gray-500">
-                    Атрибути <span className="text-red-500">*</span>
+                    Атрибути
                   </th>
                   <th className="text-left px-3 py-2 font-medium text-gray-500">
                     Ціна +/-
