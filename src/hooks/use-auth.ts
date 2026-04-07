@@ -2,7 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/api/admin-auth";
+import { login, logoutApi } from "@/lib/api/admin-auth";
 import { useAuthStore } from "@/store/auth";
 
 export function useLogin() {
@@ -22,7 +22,12 @@ export function useLogout() {
   const router = useRouter();
   const clearTokens = useAuthStore((s) => s.clearTokens);
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await logoutApi();
+    } catch {
+      // Ignore errors — clear tokens anyway
+    }
     clearTokens();
     router.push("/admin/login");
   };
