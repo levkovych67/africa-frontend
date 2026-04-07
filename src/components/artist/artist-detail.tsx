@@ -1,13 +1,16 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useArtist, useArtistProducts } from "@/hooks/use-artists";
+import { useArtist, useInfiniteArtistProducts } from "@/hooks/use-artists";
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { ProductCard } from "@/components/product/product-card";
 import {
   ProductGrid,
   ProductGridItem,
 } from "@/components/product/product-grid";
+import { LoadMoreSkeleton } from "@/components/product/load-more-skeleton";
 
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   instagram: (
@@ -51,7 +54,24 @@ interface ArtistDetailProps {
 
 export function ArtistDetail({ slug }: ArtistDetailProps) {
   const { data: artist, isLoading: artistLoading, error: artistError } = useArtist(slug);
-  const { data: productsData, isLoading: productsLoading } = useArtistProducts(slug, { size: 40 });
+  const {
+    data: productsData,
+    isLoading: productsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteArtistProducts(slug, { size: 12 });
+
+  const products = useMemo(
+    () => productsData?.pages.flatMap((p) => p.content).filter((p) => p.status === "ACTIVE") ?? [],
+    [productsData]
+  );
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const sentinelRef = useIntersectionObserver(handleLoadMore, !!hasNextPage && !isFetchingNextPage);
 
   if (artistLoading) {
     return (
@@ -81,7 +101,6 @@ export function ArtistDetail({ slug }: ArtistDetailProps) {
     );
   }
 
-  const products = productsData?.content.filter((p) => p.status === "ACTIVE") ?? [];
   const hasSocials = artist.socialLinks && Object.keys(artist.socialLinks).length > 0;
 
   return (
@@ -166,13 +185,17 @@ export function ArtistDetail({ slug }: ArtistDetailProps) {
             </p>
           </div>
         ) : (
-          <ProductGrid>
-            {products.map((product, i) => (
-              <ProductGridItem key={product.id}>
-                <ProductCard product={product} priority={i < 4} />
-              </ProductGridItem>
-            ))}
-          </ProductGrid>
+          <>
+            <ProductGrid>
+              {products.map((product, i) => (
+                <ProductGridItem key={product.id}>
+                  <ProductCard product={product} priority={i < 4} />
+                </ProductGridItem>
+              ))}
+            </ProductGrid>
+            <div ref={sentinelRef} className="h-1" />
+            {isFetchingNextPage && <LoadMoreSkeleton />}
+          </>
         )}
       </motion.div>
     </div>
