@@ -151,8 +151,23 @@ export function ProductForm({ product }: ProductFormProps) {
       }));
 
   const buildPayload = () => {
-    const parsedAttributes = parseAttributes();
+    let parsedAttributes = parseAttributes();
     const parsedVariants = parseVariants();
+
+    // Auto-generate attributes from variants if not filled manually
+    if (parsedAttributes.length === 0 && parsedVariants.length > 0) {
+      const attrMap = new Map<string, Set<string>>();
+      for (const v of parsedVariants) {
+        for (const [key, val] of Object.entries(v.attributes)) {
+          if (!attrMap.has(key)) attrMap.set(key, new Set());
+          attrMap.get(key)!.add(val as string);
+        }
+      }
+      parsedAttributes = Array.from(attrMap.entries()).map(([type, vals]) => ({
+        type,
+        values: Array.from(vals),
+      }));
+    }
 
     return {
       title,
@@ -160,9 +175,9 @@ export function ProductForm({ product }: ProductFormProps) {
       description: description || undefined,
       basePrice,
       artistId: artistId || undefined,
-      images: images.length > 0 ? images : undefined,
-      attributes: parsedAttributes.length > 0 ? parsedAttributes : undefined,
-      variants: parsedVariants.length > 0 ? parsedVariants : undefined,
+      images,
+      attributes: parsedAttributes,
+      variants: parsedVariants,
       ...(isEdit && product?.status && product.status !== "ARCHIVED"
         ? { status: product.status }
         : {}),
@@ -243,7 +258,11 @@ export function ProductForm({ product }: ProductFormProps) {
           data: { ...buildPayload(), status: "ACTIVE" },
         });
       } else {
-        await createProduct.mutateAsync({ ...buildPayload(), status: "ACTIVE" });
+        const created = await createProduct.mutateAsync(buildPayload());
+        await updateProduct.mutateAsync({
+          id: created.id,
+          data: { status: "ACTIVE" },
+        });
       }
       router.push("/admin/products");
     } catch (err) {

@@ -1,16 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition, lazy, Suspense } from "react";
 import { useProducts } from "@/hooks/use-products";
-import dynamic from "next/dynamic";
 import { ProductCard } from "@/components/product/product-card";
 import { ProductGrid, ProductGridItem } from "@/components/product/product-grid";
 import { ProductFilters, ActiveFilters } from "@/components/product/product-filters";
 
-const ProductOverlay = dynamic(
-  () => import("@/components/product/product-overlay").then(m => m.ProductOverlay),
-  { ssr: false }
-);
+const ProductOverlay = lazy(() => import("@/components/product/product-overlay").then(m => ({ default: m.ProductOverlay })));
 import { Product } from "@/types/product";
 
 function filterByAttributes(
@@ -37,6 +33,7 @@ export function ProductFeed() {
     attributes: {},
   });
   const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
 
   const { data, isLoading, error } = useProducts({
     size: 100,
@@ -82,7 +79,7 @@ export function ProductFeed() {
               <ProductCard
                 product={product}
                 priority={false}
-                onExpand={setExpandedSlug}
+                onExpand={(slug) => startTransition(() => setExpandedSlug(slug))}
               />
             </ProductGridItem>
           ))}
@@ -90,10 +87,12 @@ export function ProductFeed() {
       )}
 
       {expandedSlug && (
-        <ProductOverlay
-          slug={expandedSlug}
-          onClose={() => setExpandedSlug(null)}
-        />
+        <Suspense fallback={null}>
+          <ProductOverlay
+            slug={expandedSlug}
+            onClose={() => setExpandedSlug(null)}
+          />
+        </Suspense>
       )}
     </>
   );
