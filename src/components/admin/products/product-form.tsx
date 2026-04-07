@@ -258,11 +258,7 @@ export function ProductForm({ product }: ProductFormProps) {
           data: { ...buildPayload(), status: "ACTIVE" },
         });
       } else {
-        const created = await createProduct.mutateAsync(buildPayload());
-        await updateProduct.mutateAsync({
-          id: created.id,
-          data: { status: "ACTIVE" },
-        });
+        await createProduct.mutateAsync({ ...buildPayload(), status: "ACTIVE" });
       }
       router.push("/admin/products");
     } catch (err) {
