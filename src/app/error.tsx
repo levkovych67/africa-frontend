@@ -1,15 +1,21 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/header";
 
 export default function Error({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error("Error boundary:", error, "digest:", error.digest);
+  }, [error]);
+
   return (
     <>
       <Header />

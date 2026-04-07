@@ -10,10 +10,10 @@ export function useCheckout() {
   });
 }
 
-export function useOrder(id: string) {
+export function useOrder(id: string, accessToken?: string) {
   return useQuery({
-    queryKey: ["order", id],
-    queryFn: () => getOrder(id),
+    queryKey: ["order", id, accessToken],
+    queryFn: () => getOrder(id, accessToken),
     enabled: !!id,
   });
 }

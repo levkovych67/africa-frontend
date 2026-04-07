@@ -24,9 +24,9 @@ function filterByAttributes(
 
   return products.filter((product) =>
     activeEntries.every(([type, selectedValues]) => {
-      const attr = product.attributes.find((a) => a.type === type);
+      const attr = (product.attributes ?? []).find((a) => a.type === type);
       if (!attr) return false;
-      return selectedValues.some((v) => attr.values.includes(v));
+      return selectedValues.some((v) => (attr.values ?? []).includes(v));
     })
   );
 }

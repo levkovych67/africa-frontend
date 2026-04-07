@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export interface CartItem {
   productId: string;
@@ -68,6 +68,15 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: "africa-cart",
+      storage: createJSONStorage(() =>
+        typeof window !== "undefined"
+          ? localStorage
+          : {
+              getItem: () => null,
+              setItem: () => {},
+              removeItem: () => {},
+            }
+      ),
       partialize: (state) => ({ items: state.items }),
     }
   )

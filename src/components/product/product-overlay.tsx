@@ -85,6 +85,7 @@ function OverlayGallery({
           <>
             <button
               type="button"
+              aria-label="Попереднє зображення"
               onClick={() => scrollTo(Math.max(0, activeIndex - 1))}
               className={cn(
                 "absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full text-xs transition-opacity",
@@ -95,6 +96,7 @@ function OverlayGallery({
             </button>
             <button
               type="button"
+              aria-label="Наступне зображення"
               onClick={() => scrollTo(Math.min(filtered.length - 1, activeIndex + 1))}
               className={cn(
                 "absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full text-xs transition-opacity",
@@ -138,7 +140,7 @@ function OverlayGallery({
 // ─── iOS Rubber Band Dismissal ──────────────────────────────────────
 
 export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
-  const { data: product, isLoading } = useProduct(slug);
+  const { data: product, isLoading, error } = useProduct(slug);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(true);
   const [isEjecting, setIsEjecting] = useState(false);
@@ -426,6 +428,7 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
                   {/* Close button — always visible */}
                   <button
                     type="button"
+                    aria-label="Закрити"
                     onClick={() => setIsOpen(false)}
                     className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-stone-500 hover:bg-stone-900 hover:text-white transition-all duration-200"
                   >
@@ -443,7 +446,17 @@ export function ProductOverlay({ slug, onClose }: ProductOverlayProps) {
                       aria-hidden="true"
                     />
                     <div className="relative z-[1]">
-                      {isLoading || !product ? (
+                      {error ? (
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                          <p className="text-sm text-stone-500 mb-4">Не вдалося завантажити товар</p>
+                          <button
+                            onClick={() => { setIsOpen(false); setTimeout(() => onClose(), 300); }}
+                            className="rounded-full py-2.5 px-6 font-jakarta font-bold text-xs uppercase tracking-wider border border-stone-200 text-stone-600 hover:border-stone-400 transition-all duration-200"
+                          >
+                            Закрити
+                          </button>
+                        </div>
+                      ) : isLoading || !product ? (
                         <div className="space-y-4">
                           <div className="aspect-[3/4] bg-stone-100 rounded-2xl animate-pulse" />
                           <div className="h-6 w-3/4 bg-stone-100 rounded-xl animate-pulse" />

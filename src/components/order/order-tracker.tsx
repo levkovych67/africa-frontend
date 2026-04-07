@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/utils/price";
 
 interface OrderTrackerProps {
   orderId: string;
+  accessToken?: string;
 }
 
 /* ─── Mini icon components ─── */
@@ -83,8 +84,8 @@ const stagger = (i: number) => ({
 });
 
 /* ─── Main component ─── */
-export function OrderTracker({ orderId }: OrderTrackerProps) {
-  const { data: order, isLoading, error } = useOrder(orderId);
+export function OrderTracker({ orderId, accessToken }: OrderTrackerProps) {
+  const { data: order, isLoading, error } = useOrder(orderId, accessToken);
 
   if (isLoading) return <OrderSkeleton />;
 
@@ -252,21 +253,21 @@ export function OrderTracker({ orderId }: OrderTrackerProps) {
             </h3>
           </div>
           <p className="text-sm font-medium text-stone-900">
-            {order.shippingDetails.carrier || "Нова Пошта"}
+            {order.shippingDetails?.carrier || "Нова Пошта"}
           </p>
           <p className="text-sm text-stone-500 mt-1">
-            {order.shippingDetails.city}
+            {order.shippingDetails?.city}
           </p>
           <p className="text-sm text-stone-500">
-            {order.shippingDetails.warehouseDescription}
+            {order.shippingDetails?.warehouseDescription}
           </p>
-          {order.shippingDetails.trackingNumber && (
+          {order.shippingDetails?.trackingNumber && (
             <div className="mt-3 px-3.5 py-2.5 bg-stone-50 rounded-xl border border-stone-100">
               <p className="text-[10px] font-jakarta font-bold uppercase tracking-wider text-stone-400 mb-1">
                 ТТН
               </p>
               <p className="font-grotesk text-sm font-medium text-stone-900 tracking-wide tabular-nums">
-                {order.shippingDetails.trackingNumber}
+                {order.shippingDetails?.trackingNumber}
               </p>
             </div>
           )}

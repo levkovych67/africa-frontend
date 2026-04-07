@@ -6,9 +6,10 @@ import { PrecisionButton } from "@/components/ui/precision-button";
 
 interface CheckoutSuccessProps {
   orderId: string;
+  accessToken?: string | null;
 }
 
-export function CheckoutSuccess({ orderId }: CheckoutSuccessProps) {
+export function CheckoutSuccess({ orderId, accessToken }: CheckoutSuccessProps) {
   return (
     <div className="max-w-[600px] mx-auto px-6 py-20 text-center">
       {/* Animated checkmark */}
@@ -82,7 +83,7 @@ export function CheckoutSuccess({ orderId }: CheckoutSuccessProps) {
         transition={{ delay: 0.6, type: "spring", stiffness: 300, damping: 30 }}
         className="flex flex-col gap-3 items-center"
       >
-        <Link href={`/order/${orderId}`}>
+        <Link href={`/order/${orderId}${accessToken ? `?accessToken=${accessToken}` : ""}`}>
           <PrecisionButton>Відстежити замовлення</PrecisionButton>
         </Link>
         <Link

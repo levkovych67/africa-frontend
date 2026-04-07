@@ -22,6 +22,10 @@ export async function getAdminOrders(params?: {
   );
 }
 
+export async function getAdminOrder(id: string): Promise<AdminOrder> {
+  return adminClient<AdminOrder>(`/api/v1/admin/orders/${id}`);
+}
+
 export async function updateOrderStatus(
   id: string,
   status: OrderStatus,

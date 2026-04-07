@@ -5,7 +5,7 @@ import { refreshAccessToken } from "./admin-auth";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-let isRefreshing = false;
+let refreshPromise: Promise<{ accessToken: string; refreshToken: string }> | null = null;
 
 export async function adminClient<T>(
   endpoint: string,
@@ -17,27 +17,37 @@ export async function adminClient<T>(
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+      ...(accessToken?.trim() && { Authorization: `Bearer ${accessToken}` }),
       ...options?.headers,
     },
   });
 
-  if (response.status === 401 && !isRefreshing) {
+  if (response.status === 401) {
     const { refreshToken } = useAuthStore.getState();
 
     if (refreshToken) {
-      isRefreshing = true;
+      if (!refreshPromise) {
+        refreshPromise = refreshAccessToken(refreshToken)
+          .then((tokens) => {
+            useAuthStore.getState().setTokens(tokens.accessToken, tokens.refreshToken);
+            return tokens;
+          })
+          .catch((err) => {
+            useAuthStore.getState().clearTokens();
+            if (typeof window !== "undefined") {
+              window.location.href = "/admin/login";
+            }
+            throw err;
+          })
+          .finally(() => {
+            refreshPromise = null;
+          });
+      }
+
       try {
-        const tokens = await refreshAccessToken(refreshToken);
-        useAuthStore.getState().setTokens(tokens.accessToken, tokens.refreshToken);
-        isRefreshing = false;
+        await refreshPromise;
         return adminClient<T>(endpoint, options);
       } catch {
-        isRefreshing = false;
-        useAuthStore.getState().clearTokens();
-        if (typeof window !== "undefined") {
-          window.location.href = "/admin/login";
-        }
         throw new Error("Сесія закінчилась");
       }
     }
@@ -47,6 +57,15 @@ export async function adminClient<T>(
       window.location.href = "/admin/login";
     }
     throw new Error("Не авторизовано");
+  }
+
+  if (response.status === 429) {
+    throw new ApiRequestError({
+      status: 429,
+      error: "Too Many Requests",
+      message: "Забагато запитів. Зачекайте хвилину і спробуйте ще раз.",
+      timestamp: new Date().toISOString(),
+    });
   }
 
   if (!response.ok) {

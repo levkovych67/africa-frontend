@@ -17,7 +17,7 @@ export function organizationJsonLd() {
     "@type": "Organization",
     name: SITE_NAME,
     url: SITE_URL,
-    logo: `${SITE_URL}/images/new%20logo.webp`,
+    logo: `${SITE_URL}/images/new-logo.webp`,
     description: SITE_DESCRIPTION,
     sameAs: [],
   };
@@ -42,8 +42,11 @@ export function websiteJsonLd() {
 }
 
 export function productJsonLd(product: Product) {
-  const inStock = product.variants.some((v) => v.stock > 0);
-  const prices = product.variants.map((v) => product.basePrice + v.priceModifier);
+  const variants = product.variants ?? [];
+  const inStock = variants.some((v) => v.stock > 0);
+  const prices = variants.length > 0
+    ? variants.map((v) => product.basePrice + v.priceModifier)
+    : [product.basePrice];
   const minPrice = Math.min(...prices);
   const maxPrice = Math.max(...prices);
 
@@ -53,7 +56,7 @@ export function productJsonLd(product: Product) {
     name: product.title,
     description: product.description,
     image: product.images,
-    sku: product.variants[0]?.sku,
+    sku: variants[0]?.sku,
     url: `${SITE_URL}/product/${product.slug}`,
     brand: {
       "@type": "Brand",
@@ -86,7 +89,7 @@ export function productJsonLd(product: Product) {
             priceCurrency: "UAH",
             lowPrice: minPrice,
             highPrice: maxPrice,
-            offerCount: product.variants.length,
+            offerCount: variants.length,
             availability: inStock
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",

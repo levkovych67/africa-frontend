@@ -1,7 +1,11 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAdminOrders, updateOrderStatus } from "@/lib/api/admin-orders";
+import {
+  getAdminOrders,
+  getAdminOrder,
+  updateOrderStatus,
+} from "@/lib/api/admin-orders";
 import { OrderStatus } from "@/types/admin";
 
 export function useAdminOrders(params?: {
@@ -14,6 +18,14 @@ export function useAdminOrders(params?: {
   return useQuery({
     queryKey: ["admin-orders", params],
     queryFn: () => getAdminOrders(params),
+  });
+}
+
+export function useAdminOrder(id: string) {
+  return useQuery({
+    queryKey: ["admin-orders", id],
+    queryFn: () => getAdminOrder(id),
+    enabled: !!id,
   });
 }
 

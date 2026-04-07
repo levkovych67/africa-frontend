@@ -121,6 +121,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
             <>
               <button
                 type="button"
+                aria-label="Попереднє зображення"
                 onClick={() => scrollTo(Math.max(0, activeIndex - 1))}
                 className={cn(
                   "absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full shadow-soft font-sans text-sm",
@@ -132,6 +133,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
               </button>
               <button
                 type="button"
+                aria-label="Наступне зображення"
                 onClick={() =>
                   scrollTo(Math.min(filtered.length - 1, activeIndex + 1))
                 }

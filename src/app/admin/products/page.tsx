@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAdminProducts } from "@/hooks/use-admin-products";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { formatPrice } from "@/lib/utils/price";
 
 const STATUS_BADGE: Record<string, string> = {
@@ -25,11 +26,13 @@ export default function AdminProductsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  const debouncedSearch = useDebouncedValue(search);
+
   const { data, isLoading, error } = useAdminProducts({
     page,
     size: 20,
     sort: "createdAt,desc",
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     status: statusFilter || undefined,
   });
 

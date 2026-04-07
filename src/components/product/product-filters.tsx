@@ -397,11 +397,12 @@ export function ProductFilters({ filters, onChange }: ProductFiltersProps) {
                     </div>
                     <button
                       type="button"
+                      aria-label="Закрити фільтри"
                       onClick={() => setMobileOpen(false)}
                       className="
-                        w-8 h-8 rounded-full bg-stone-100 
-                        flex items-center justify-center 
-                        text-stone-400 hover:text-stone-600 hover:bg-stone-200 
+                        w-8 h-8 rounded-full bg-stone-100
+                        flex items-center justify-center
+                        text-stone-400 hover:text-stone-600 hover:bg-stone-200
                         transition-all duration-200
                       "
                     >

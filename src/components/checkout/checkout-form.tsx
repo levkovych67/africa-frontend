@@ -30,6 +30,7 @@ export function CheckoutForm() {
   const { items, totalPrice, clearCart } = useCartStore();
   const checkout = useCheckout();
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [orderAccessToken, setOrderAccessToken] = useState<string | null>(null);
   const [stockError, setStockError] = useState<string | null>(null);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
@@ -60,7 +61,7 @@ export function CheckoutForm() {
   }
 
   if (orderId) {
-    return <CheckoutSuccess orderId={orderId} />;
+    return <CheckoutSuccess orderId={orderId} accessToken={orderAccessToken} />;
   }
 
   const updateField = (field: keyof FormData, value: string) => {
@@ -114,16 +115,19 @@ export function CheckoutForm() {
 
       if (paymentMethod === "ONLINE") {
         try {
+          if (!order.accessToken) throw new Error("Відсутній токен оплати");
           const redirectUrl = `${window.location.origin}/order/${order.id}?accessToken=${order.accessToken}`;
-          const { paymentUrl } = await createPayment(order.id, order.accessToken!, redirectUrl);
+          const { paymentUrl } = await createPayment(order.id, order.accessToken, redirectUrl);
           clearCart();
           window.location.href = paymentUrl;
         } catch {
           // Order exists in WAITING_PAYMENT — redirect to order page
           clearCart();
+          setOrderAccessToken(order.accessToken ?? null);
           setOrderId(order.id);
         }
       } else {
+        setOrderAccessToken(order.accessToken ?? null);
         setOrderId(order.id);
         clearCart();
       }

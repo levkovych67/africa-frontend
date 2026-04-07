@@ -10,8 +10,9 @@ export async function submitCheckout(
   });
 }
 
-export async function getOrder(id: string): Promise<OrderResponse> {
-  return apiClient<OrderResponse>(`/api/v1/orders/${id}`);
+export async function getOrder(id: string, accessToken?: string): Promise<OrderResponse> {
+  const query = accessToken ? `?accessToken=${encodeURIComponent(accessToken)}` : "";
+  return apiClient<OrderResponse>(`/api/v1/orders/${id}${query}`);
 }
 
 export async function createPayment(

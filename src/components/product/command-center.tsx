@@ -62,7 +62,7 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
       variantLabel,
       unitPrice: price,
       quantity: 1,
-      image: product.images[0] || "",
+      image: (product.images ?? [])[0] || "",
     });
 
     openCart();

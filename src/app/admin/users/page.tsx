@@ -1,16 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   useAdminUsers,
   useCreateAdminUser,
   useDeleteAdminUser,
 } from "@/hooks/use-admin-users";
+import { useAuthStore } from "@/store/auth";
+
+function getCurrentEmailFromJwt(token: string | null): string | null {
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.sub || payload.email || null;
+  } catch {
+    return null;
+  }
+}
 
 export default function AdminUsersPage() {
   const { data: users, isLoading, error } = useAdminUsers();
   const createMutation = useCreateAdminUser();
   const deleteMutation = useDeleteAdminUser();
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const currentEmail = useMemo(() => getCurrentEmailFromJwt(accessToken), [accessToken]);
 
   const [showForm, setShowForm] = useState(false);
   const [email, setEmail] = useState("");
@@ -151,14 +164,18 @@ export default function AdminUsersPage() {
                     {formatDate(user.createdAt)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(user.id, user.name)}
-                      disabled={deleteMutation.isPending}
-                      className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
-                    >
-                      Видалити
-                    </button>
+                    {currentEmail === user.email ? (
+                      <span className="text-xs text-gray-400">Ви</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(user.id, user.name)}
+                        disabled={deleteMutation.isPending}
+                        className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                      >
+                        Видалити
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

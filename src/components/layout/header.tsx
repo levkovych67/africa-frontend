@@ -45,6 +45,8 @@ export function Header() {
       <button
         ref={pulseRef}
         type="button"
+        aria-expanded={isOpen}
+        aria-label={isOpen ? "Закрити кошик" : "Відкрити кошик"}
         onClick={isOpen ? closeCart : openCart}
         className="font-jakarta font-bold text-xs uppercase tracking-wider transition-transform duration-400"
       >

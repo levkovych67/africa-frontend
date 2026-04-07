@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminOrders } from "@/hooks/use-admin-orders";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { OrderStatus } from "@/types/admin";
 import { formatPrice } from "@/lib/utils/price";
 
@@ -40,8 +41,10 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "">("");
   const [page, setPage] = useState(0);
 
+  const debouncedSearch = useDebouncedValue(search);
+
   const { data, isLoading, error } = useAdminOrders({
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     status: statusFilter || undefined,
     page,
     size: 20,

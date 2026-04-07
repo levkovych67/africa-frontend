@@ -5,6 +5,7 @@ const OrderTracker = dynamic(() => import("@/components/order/order-tracker").th
 
 interface OrderPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ accessToken?: string }>;
 }
 
 export async function generateMetadata({ params }: OrderPageProps) {
@@ -15,13 +16,14 @@ export async function generateMetadata({ params }: OrderPageProps) {
   };
 }
 
-export default async function OrderPage({ params }: OrderPageProps) {
+export default async function OrderPage({ params, searchParams }: OrderPageProps) {
   const { id } = await params;
+  const { accessToken } = await searchParams;
 
   return (
     <PageTransition>
       <main>
-        <OrderTracker orderId={id} />
+        <OrderTracker orderId={id} accessToken={accessToken} />
       </main>
     </PageTransition>
   );

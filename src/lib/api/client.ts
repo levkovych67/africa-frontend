@@ -18,13 +18,23 @@ export async function apiClient<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
+  const { headers: customHeaders, ...restOptions } = options || {};
   const response = await fetch(`${BASE_URL}${endpoint}`, {
+    ...restOptions,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...customHeaders,
     },
-    ...options,
   });
+
+  if (response.status === 429) {
+    throw new ApiRequestError({
+      status: 429,
+      error: "Too Many Requests",
+      message: "Забагато запитів. Зачекайте хвилину і спробуйте ще раз.",
+      timestamp: new Date().toISOString(),
+    });
+  }
 
   if (!response.ok) {
     const error: ApiError = await response.json().catch(() => ({

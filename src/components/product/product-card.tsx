@@ -18,7 +18,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, priority = false, onExpand }: ProductCardProps) {
-  const images = product.images.filter(isImageUrl);
+  const images = (product.images ?? []).filter(isImageUrl);
   const [activeIndex, setActiveIndex] = useState(0);
   const [hasHovered, setHasHovered] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
