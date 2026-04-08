@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart";
 import { useCheckout } from "@/hooks/use-checkout";
@@ -25,6 +25,18 @@ export interface FormData {
   comment: string;
 }
 
+const STORAGE_KEY = "africa-checkout";
+
+function loadSavedForm(): { formData: FormData; paymentMethod: PaymentMethod } | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 export function CheckoutForm() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCartStore();
@@ -33,8 +45,10 @@ export function CheckoutForm() {
   const [orderAccessToken, setOrderAccessToken] = useState<string | null>(null);
   const [stockError, setStockError] = useState<string | null>(null);
   const [errors, setErrors] = useState<ValidationErrors>({});
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
-  const [formData, setFormData] = useState<FormData>({
+
+  const saved = loadSavedForm();
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(saved?.paymentMethod ?? "COD");
+  const [formData, setFormData] = useState<FormData>(saved?.formData ?? {
     firstName: "",
     lastName: "",
     email: "",
@@ -45,6 +59,15 @@ export function CheckoutForm() {
     warehouseDescription: "",
     comment: "",
   });
+
+  // Persist form data to localStorage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ formData, paymentMethod }));
+  }, [formData, paymentMethod]);
+
+  const clearSavedForm = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
 
   if (items.length === 0 && !orderId) {
     return (
@@ -119,10 +142,12 @@ export function CheckoutForm() {
           const redirectUrl = `${window.location.origin}/order/${order.id}?accessToken=${order.accessToken}`;
           const { paymentUrl } = await createPayment(order.id, order.accessToken, redirectUrl);
           clearCart();
+          clearSavedForm();
           window.location.href = paymentUrl;
         } catch {
           // Order exists in WAITING_PAYMENT — redirect to order page
           clearCart();
+          clearSavedForm();
           setOrderAccessToken(order.accessToken ?? null);
           setOrderId(order.id);
         }
@@ -130,6 +155,7 @@ export function CheckoutForm() {
         setOrderAccessToken(order.accessToken ?? null);
         setOrderId(order.id);
         clearCart();
+        clearSavedForm();
       }
     } catch (err) {
       if (err instanceof ApiRequestError && err.status === 400) {

@@ -32,6 +32,8 @@ interface ValidationErrors {
   title?: string;
   description?: string;
   images?: string;
+  attributes?: string;
+  attributeRows?: Record<number, { type?: string }>;
   variants?: string;
   variantRows?: Record<number, { sku?: string; attributes?: string; price?: string; stock?: string }>;
 }
@@ -201,6 +203,20 @@ export function ProductForm({ product }: ProductFormProps) {
       setSlugError("Тільки a-z, 0-9 та дефіс. Без пробілів та кирилиці.");
     }
 
+    // Validate attribute name duplicates
+    const attrRowErrors: Record<number, { type?: string }> = {};
+    const seenAttrTypes = new Set<string>();
+    attributes.forEach((a, i) => {
+      const normalized = a.type.trim().toLowerCase();
+      if (!normalized) return;
+      if (seenAttrTypes.has(normalized)) {
+        attrRowErrors[i] = { type: "Назва атрибута вже існує" };
+      } else {
+        seenAttrTypes.add(normalized);
+      }
+    });
+    if (Object.keys(attrRowErrors).length > 0) errs.attributeRows = attrRowErrors;
+
     // At least one variant is required
     const filledVariants = variants.filter((v) => v.sku.trim());
     if (filledVariants.length === 0) {
@@ -227,6 +243,9 @@ export function ProductForm({ product }: ProductFormProps) {
         } else {
           seenSkus.add(normalized);
         }
+      }
+      if (filledVariants.length > 1 && !v.attributes.trim()) {
+        rowErr.attributes = "Атрибути обов'язкові при кількох варіантах";
       }
       if (v.price <= 0) rowErr.price = "Ціна має бути більше 0";
       if (v.stock < 0) rowErr.stock = "Не може бути від'ємним";
@@ -513,21 +532,28 @@ export function ProductForm({ product }: ProductFormProps) {
         <h2 className="text-sm font-medium text-gray-900 mb-3">Атрибути</h2>
 
         <div className="space-y-2">
-          {attributes.map((attr, i) => (
+          {attributes.map((attr, i) => {
+            const attrErr = errors.attributeRows?.[i];
+            return (
             <div key={i} className="flex gap-2 items-start">
-              <input
-                type="text"
-                placeholder="Тип (напр. Розмір)"
-                value={attr.type}
-                onChange={(e) =>
-                  setAttributes((prev) =>
-                    prev.map((a, j) =>
-                      j === i ? { ...a, type: e.target.value } : a
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Тип (напр. Розмір)"
+                  value={attr.type}
+                  onChange={(e) =>
+                    setAttributes((prev) =>
+                      prev.map((a, j) =>
+                        j === i ? { ...a, type: e.target.value } : a
+                      )
                     )
-                  )
-                }
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              />
+                  }
+                  className={`w-full border rounded-lg px-3 py-2 text-sm outline-none ${attrErr?.type ? "border-red-500 bg-red-50 focus:ring-2 focus:ring-red-400" : "border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"}`}
+                />
+                {attrErr?.type && (
+                  <p className="mt-0.5 text-xs text-red-500">{attrErr.type}</p>
+                )}
+              </div>
               <input
                 type="text"
                 placeholder="Значення (M, L, XL)"
@@ -551,7 +577,8 @@ export function ProductForm({ product }: ProductFormProps) {
                 Видалити
               </button>
             </div>
-          ))}
+          );
+          })}
         </div>
 
         <button
