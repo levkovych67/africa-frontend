@@ -45,6 +45,7 @@ export function CheckoutForm() {
   const [orderAccessToken, setOrderAccessToken] = useState<string | null>(null);
   const [stockError, setStockError] = useState<string | null>(null);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const saved = loadSavedForm();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(saved?.paymentMethod ?? "COD");
@@ -99,8 +100,8 @@ export function CheckoutForm() {
   };
 
   const handleSubmit = async () => {
-    // Prevent double-submit
-    if (checkout.isPending) return;
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     const validationErrors = validateCheckout(formData);
     if (Object.keys(validationErrors).length > 0) {
@@ -159,12 +160,12 @@ export function CheckoutForm() {
         setOrderId(order.id);
       }
     } catch (err) {
+      setIsSubmitting(false);
       if (err instanceof ApiRequestError && (err.status === 400 || err.status === 409 || err.status === 404)) {
         setStockError(err.message);
       } else {
         setStockError("Сталася помилка. Спробуйте ще раз.");
       }
-      // Scroll to error
       setTimeout(() => {
         document.querySelector("[data-stock-error]")?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 100);
@@ -202,7 +203,7 @@ export function CheckoutForm() {
         paymentMethod={paymentMethod}
         onPaymentMethodChange={setPaymentMethod}
         onSubmit={handleSubmit}
-        isLoading={checkout.isPending}
+        isLoading={isSubmitting}
       />
     </div>
   );

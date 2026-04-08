@@ -45,7 +45,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
             <button
               type="button"
               onClick={() => updateQuantity(item.sku, item.quantity + 1)}
-              disabled={item.quantity >= item.maxStock}
+              disabled={!!(item.maxStock && item.quantity >= item.maxStock)}
               className="px-3 py-1 font-jakarta text-sm disabled:opacity-30"
             >
               +

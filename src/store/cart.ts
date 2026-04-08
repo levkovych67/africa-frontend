@@ -63,7 +63,7 @@ export const useCartStore = create<CartStore>()(
               ? state.items.filter((i) => i.sku !== sku)
               : state.items.map((i) =>
                   i.sku === sku
-                    ? { ...i, quantity: Math.min(quantity, i.maxStock) }
+                    ? { ...i, quantity: i.maxStock ? Math.min(quantity, i.maxStock) : quantity }
                     : i
                 ),
         })),
@@ -99,6 +99,16 @@ export const useCartStore = create<CartStore>()(
             }
       ),
       partialize: (state) => ({ items: state.items }),
+      merge: (persisted, current) => {
+        const persistedState = persisted as { items?: CartItem[] };
+        return {
+          ...current,
+          items: (persistedState?.items ?? []).map((item) => ({
+            ...item,
+            maxStock: item.maxStock ?? item.quantity,
+          })),
+        };
+      },
     }
   )
 );

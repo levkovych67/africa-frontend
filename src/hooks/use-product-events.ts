@@ -27,6 +27,13 @@ export function useProductEvents() {
   useEffect(() => {
     const es = new EventSource(`${BASE_URL}/api/v1/products/events`);
 
+    es.onerror = () => {
+      // EventSource auto-reconnects; this just logs the disconnect
+      if (es.readyState === EventSource.CLOSED) {
+        console.warn("[SSE] Connection closed, will not reconnect");
+      }
+    };
+
     es.addEventListener("product-update", (e) => {
       try {
         const event: ProductUpdateEvent = JSON.parse(e.data);
