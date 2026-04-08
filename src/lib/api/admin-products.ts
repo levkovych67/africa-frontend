@@ -59,7 +59,7 @@ export async function updateProduct(
   });
 }
 
-export async function archiveProduct(id: string): Promise<void> {
+export async function deleteProduct(id: string): Promise<void> {
   return adminClient<void>(`/api/v1/admin/products/${id}`, {
     method: "DELETE",
   });

@@ -9,6 +9,7 @@ import {
 } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/cn";
+import { FadeImage } from "@/components/ui/fade-image";
 import { useProduct } from "@/hooks/use-products";
 import { CommandCenter } from "./command-center";
 
@@ -66,8 +67,8 @@ function OverlayGallery({
           className="snap-carousel"
         >
           {filtered.map((src, i) => (
-            <div key={i} className="w-full flex-none snap-center relative">
-              <Image
+            <div key={i} className="w-full flex-none snap-center relative shimmer-bg">
+              <FadeImage
                 src={src}
                 alt={`${title} ${i + 1}`}
                 fill
@@ -122,12 +123,13 @@ function OverlayGallery({
                 i === activeIndex ? "opacity-100 ring-2 ring-stone-900" : "opacity-50 hover:opacity-80"
               )}
             >
-              <Image
+              <FadeImage
                 src={src}
                 alt={`${title} мініатюра ${i + 1}`}
                 fill
                 className="object-cover"
                 sizes="56px"
+                quality={50}
               />
             </button>
           ))}

@@ -36,3 +36,9 @@ export async function updateOrderStatus(
     body: JSON.stringify({ status, trackingNumber: trackingNumber || undefined }),
   });
 }
+
+export async function deleteOrder(id: string): Promise<void> {
+  return adminClient<void>(`/api/v1/admin/orders/${id}`, {
+    method: "DELETE",
+  });
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { FadeImage } from "@/components/ui/fade-image";
 import { CartItem, useCartStore } from "@/store/cart";
 import { formatPrice } from "@/lib/utils/price";
 
@@ -13,14 +13,15 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
   return (
     <div className="flex gap-4">
-      <div className="relative h-24 w-20 shrink-0 rounded-lg overflow-hidden">
+      <div className="relative h-24 w-20 shrink-0 rounded-lg overflow-hidden shimmer-bg">
         {item.image && (
-          <Image
+          <FadeImage
             src={item.image}
             alt={item.productTitle}
             fill
             className="object-cover"
             sizes="80px"
+            quality={50}
           />
         )}
       </div>

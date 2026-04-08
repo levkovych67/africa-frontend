@@ -7,7 +7,7 @@ import { Product } from "@/types/product";
 import {
   useCreateProduct,
   useUpdateProduct,
-  useArchiveProduct,
+  useDeleteProduct,
 } from "@/hooks/use-admin-products";
 import { useAdminArtists } from "@/hooks/use-admin-artists";
 import { useImageUpload } from "@/hooks/use-image-upload";
@@ -73,7 +73,7 @@ export function ProductForm({ product }: ProductFormProps) {
   // Hooks
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
-  const archiveProduct = useArchiveProduct();
+  const deleteProduct = useDeleteProduct();
   const imageUpload = useImageUpload();
   const { data: artistsData } = useAdminArtists({ size: 100 });
 
@@ -276,16 +276,16 @@ export function ProductForm({ product }: ProductFormProps) {
     }
   };
 
-  const handleArchive = async () => {
+  const handleDelete = async () => {
     if (!product) return;
-    if (!window.confirm("Архівувати цей товар?")) return;
+    if (!window.confirm("Видалити цей товар назавжди?")) return;
 
     try {
-      await archiveProduct.mutateAsync(product.id);
+      await deleteProduct.mutateAsync(product.id);
       router.push("/admin/products");
     } catch (err) {
       window.alert(
-        err instanceof Error ? err.message : "Помилка архівування"
+        err instanceof Error ? err.message : "Помилка видалення"
       );
     }
   };
@@ -316,7 +316,7 @@ export function ProductForm({ product }: ProductFormProps) {
   const isSaving =
     createProduct.isPending ||
     updateProduct.isPending ||
-    archiveProduct.isPending;
+    deleteProduct.isPending;
 
   const inputClass = (hasError: boolean) =>
     `w-full border rounded-lg px-3 py-2 text-sm outline-none ${
@@ -729,11 +729,11 @@ export function ProductForm({ product }: ProductFormProps) {
         {isEdit && (
           <button
             type="button"
-            onClick={handleArchive}
+            onClick={handleDelete}
             disabled={isSaving}
             className="bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-red-700 disabled:opacity-50"
           >
-            Архівувати
+            Видалити
           </button>
         )}
 

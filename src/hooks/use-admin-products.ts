@@ -6,7 +6,7 @@ import {
   getAdminProduct,
   createProduct,
   updateProduct,
-  archiveProduct,
+  deleteProduct,
   CreateProductPayload,
 } from "@/lib/api/admin-products";
 
@@ -55,11 +55,11 @@ export function useUpdateProduct() {
   });
 }
 
-export function useArchiveProduct() {
+export function useDeleteProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => archiveProduct(id),
+    mutationFn: (id: string) => deleteProduct(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
     },

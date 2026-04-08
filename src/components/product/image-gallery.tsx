@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/cn";
+import { FadeImage } from "@/components/ui/fade-image";
 
 function isImageUrl(url: string): boolean {
   return !url.endsWith(".mp4") && !url.endsWith(".webm") && !url.endsWith(".mov");
@@ -70,8 +70,8 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
             className="snap-carousel"
           >
             {filtered.map((src, i) => (
-              <div key={i} className="w-full flex-none snap-center relative">
-                <Image
+              <div key={i} className="w-full flex-none snap-center relative shimmer-bg">
+                <FadeImage
                   src={src}
                   alt={`${title} ${i + 1}`}
                   fill
@@ -102,8 +102,8 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
             className="snap-carousel"
           >
             {filtered.map((src, i) => (
-              <div key={i} className="min-w-full snap-center relative">
-                <Image
+              <div key={i} className="min-w-full snap-center relative shimmer-bg">
+                <FadeImage
                   src={src}
                   alt={`${title} ${i + 1}`}
                   fill
@@ -164,14 +164,15 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
                 key={i}
                 type="button"
                 onClick={() => scrollTo(i)}
-                className={cn("relative shrink-0 w-20 h-20 rounded-lg overflow-hidden", i === activeIndex ? "opacity-100" : "opacity-40")}
+                className={cn("relative shrink-0 w-20 h-20 rounded-lg overflow-hidden shimmer-bg", i === activeIndex ? "opacity-100" : "opacity-40")}
               >
-                <Image
+                <FadeImage
                   src={src}
                   alt={`${title} мініатюра ${i + 1}`}
                   fill
                   className="object-cover"
                   sizes="80px"
+                  quality={50}
                 />
               </button>
             ))}

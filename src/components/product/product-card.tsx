@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/cn";
+import { FadeImage } from "@/components/ui/fade-image";
 import { Product } from "@/types/product";
 import { formatPrice } from "@/lib/utils/price";
 
@@ -83,7 +84,7 @@ export function ProductCard({ product, priority = false, onExpand }: ProductCard
     >
       {/* Desktop: hover zone carousel */}
       <div
-        className="relative aspect-[4/5] rounded-t-2xl overflow-hidden hidden md:block"
+        className="relative aspect-[4/5] rounded-t-2xl overflow-hidden hidden md:block shimmer-bg"
         onMouseEnter={handleMouseEnter}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -125,7 +126,7 @@ export function ProductCard({ product, priority = false, onExpand }: ProductCard
       </div>
 
       {/* Mobile: snap-scroll carousel — only first 2 images eager, rest lazy */}
-      <div className="relative aspect-[4/5] rounded-t-2xl overflow-hidden md:hidden">
+      <div className="relative aspect-[4/5] rounded-t-2xl overflow-hidden md:hidden shimmer-bg">
         <div
           ref={scrollRef}
           onScroll={handleScroll}
@@ -133,7 +134,7 @@ export function ProductCard({ product, priority = false, onExpand }: ProductCard
         >
           {images.map((img, i) => (
             <div key={i} className="min-w-full snap-center relative">
-              <Image
+              <FadeImage
                 src={img}
                 alt={`${product.title} ${i + 1}`}
                 fill

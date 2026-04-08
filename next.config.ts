@@ -14,10 +14,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
-    formats: ["image/avif", "image/webp"],
+    formats: ["image/webp"],
     deviceSizes: [640, 750, 1080, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
     minimumCacheTTL: 2592000,
+    qualities: [50, 75],
     remotePatterns: [
       {
         protocol: "https",

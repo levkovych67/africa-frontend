@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
+import { FadeImage } from "@/components/ui/fade-image";
 import { useArtist, useInfiniteArtistProducts } from "@/hooks/use-artists";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { ProductCard } from "@/components/product/product-card";
@@ -115,8 +115,8 @@ export function ArtistDetail({ slug }: ArtistDetailProps) {
         <div className="flex items-start gap-6">
           {/* Artist image */}
           {artist.image && (
-            <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-2xl overflow-hidden bg-stone-100 shrink-0">
-              <Image
+            <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-2xl overflow-hidden shimmer-bg shrink-0">
+              <FadeImage
                 src={artist.image}
                 alt={artist.name}
                 fill

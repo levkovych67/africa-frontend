@@ -5,6 +5,7 @@ import {
   getAdminOrders,
   getAdminOrder,
   updateOrderStatus,
+  deleteOrder,
 } from "@/lib/api/admin-orders";
 import { OrderStatus } from "@/types/admin";
 
@@ -42,6 +43,17 @@ export function useUpdateOrderStatus() {
       status: OrderStatus;
       trackingNumber?: string;
     }) => updateOrderStatus(id, status, trackingNumber),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+    },
+  });
+}
+
+export function useDeleteOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteOrder(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
     },

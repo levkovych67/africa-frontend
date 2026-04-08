@@ -8,7 +8,9 @@
       "Bash(npm install:*)",
       "Skill(megathink)",
       "Bash(mv:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(find \"F:\\\\Progect\\\\2026\\\\bogdan\\\\africa\\\\africa-frontend\\\\src\" -type f \\\\\\( -name \"*.tsx\" -o -name \"*.ts\" \\\\\\) -exec grep -l \"next/image\\\\|Image.*from\" \\\\;)",
+      "Bash(npx skills:*)"
     ]
   }
 }

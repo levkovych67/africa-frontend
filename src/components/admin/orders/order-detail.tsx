@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { AdminOrder, OrderStatus } from "@/types/admin";
-import { useUpdateOrderStatus } from "@/hooks/use-admin-orders";
+import { useUpdateOrderStatus, useDeleteOrder } from "@/hooks/use-admin-orders";
 import { formatPrice } from "@/lib/utils/price";
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
@@ -186,8 +187,10 @@ function StatusActions({
 }
 
 export function OrderDetail({ order }: { order: AdminOrder }) {
+  const router = useRouter();
   const [showTtnModal, setShowTtnModal] = useState(false);
   const updateStatus = useUpdateOrderStatus();
+  const deleteOrder = useDeleteOrder();
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("uk-UA", {
@@ -197,6 +200,18 @@ export function OrderDetail({ order }: { order: AdminOrder }) {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!window.confirm("Видалити це замовлення назавжди?")) return;
+    try {
+      await deleteOrder.mutateAsync(order.id);
+      router.push("/admin/orders");
+    } catch (err) {
+      window.alert(
+        err instanceof Error ? err.message : "Помилка видалення"
+      );
+    }
   };
 
   const handleShipWithTtn = (ttn: string) => {
@@ -371,11 +386,21 @@ export function OrderDetail({ order }: { order: AdminOrder }) {
         <h3 className="text-sm font-medium text-gray-900 mb-3">
           Керування замовленням
         </h3>
-        <StatusActions
-          order={order}
-          updateStatus={updateStatus}
-          onShipClick={() => setShowTtnModal(true)}
-        />
+        <div className="flex items-center justify-between">
+          <StatusActions
+            order={order}
+            updateStatus={updateStatus}
+            onShipClick={() => setShowTtnModal(true)}
+          />
+          <button
+            type="button"
+            onClick={handleDeleteOrder}
+            disabled={deleteOrder.isPending}
+            className="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-colors"
+          >
+            {deleteOrder.isPending ? "Видалення..." : "Видалити"}
+          </button>
+        </div>
         {updateStatus.isError && (
           <p className="text-sm text-red-600 mt-2">
             Помилка оновлення статусу

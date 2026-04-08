@@ -10,6 +10,18 @@ body {
   color: #1C1917;
 }
 
+/* ─── Image loading shimmer ─── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, #f5f5f4 25%, #e7e5e4 37%, #f5f5f4 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
 /* ─── Reusable component patterns ─── */
 @layer components {
   /* Snap-scroll carousel container (used in product cards, galleries, overlays) */
