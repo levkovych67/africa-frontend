@@ -208,7 +208,11 @@ export function OrderTracker({ orderId, accessToken }: OrderTrackerProps) {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="font-grotesk text-[11px] text-emerald font-semibold uppercase tracking-widest mb-5"
           >
-            Оплачено
+            {order.paymentMethod === "COD"
+              ? "Оплата при отриманні"
+              : order.status === "WAITING_PAYMENT"
+                ? "Очікує оплати"
+                : "Оплачено"}
           </motion.p>
 
           {/* Main heading */}

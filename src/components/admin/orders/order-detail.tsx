@@ -123,7 +123,14 @@ function StatusActions({
     case "WAITING_PAYMENT":
       return (
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">Очікує оплати</span>
+          <button
+            type="button"
+            onClick={() => confirm("PENDING")}
+            disabled={isPending}
+            className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+          >
+            Оплачено
+          </button>
           <button
             type="button"
             onClick={() => confirm("CANCELLED")}
@@ -232,10 +239,16 @@ export function OrderDetail({ order }: { order: AdminOrder }) {
           <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
         </div>
         <div className="flex items-center gap-2">
-          {order.paymentMethod === "ONLINE" && order.status !== "WAITING_PAYMENT" && (
-            <span className="px-3 py-1 rounded-md text-sm font-medium bg-emerald-100 text-emerald-800">
-              Оплачено
-            </span>
+          {order.paymentMethod === "ONLINE" && (
+            order.status === "WAITING_PAYMENT" ? (
+              <span className="px-3 py-1 rounded-md text-sm font-medium bg-yellow-100 text-yellow-800">
+                Очікує оплати
+              </span>
+            ) : (
+              <span className="px-3 py-1 rounded-md text-sm font-medium bg-emerald-100 text-emerald-800">
+                Оплачено
+              </span>
+            )
           )}
           <span
             className={`px-3 py-1 rounded-md text-sm font-medium ${STATUS_BADGE[order.status]}`}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useTransition, lazy, Suspense } from "react";
+import { createPortal } from "react-dom";
 import { useInfiniteProducts } from "@/hooks/use-products";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { ProductCard } from "@/components/product/product-card";
@@ -118,13 +119,14 @@ export function ProductFeed() {
         </>
       )}
 
-      {expandedSlug && (
+      {expandedSlug && createPortal(
         <Suspense fallback={null}>
           <ProductOverlay
             slug={expandedSlug}
             onClose={() => setExpandedSlug(null)}
           />
-        </Suspense>
+        </Suspense>,
+        document.body
       )}
     </>
   );
