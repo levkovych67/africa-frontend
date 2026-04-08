@@ -8,6 +8,7 @@ const mockItem = {
   variantLabel: "Size: S, Color: Black",
   unitPrice: 29.99,
   quantity: 1,
+  maxStock: 10,
   image: "/img/tshirt.jpg",
 };
 
@@ -18,6 +19,7 @@ const mockItem2 = {
   variantLabel: "Size: M, Color: White",
   unitPrice: 49.99,
   quantity: 2,
+  maxStock: 20,
   image: "/img/hoodie.jpg",
 };
 
@@ -46,6 +48,14 @@ describe("Cart Store", () => {
       useCartStore.getState().addItem(mockItem2);
       expect(useCartStore.getState().items).toHaveLength(2);
     });
+
+    it("caps quantity at maxStock", () => {
+      const limited = { ...mockItem, maxStock: 2 };
+      useCartStore.getState().addItem(limited);
+      useCartStore.getState().addItem(limited);
+      useCartStore.getState().addItem(limited);
+      expect(useCartStore.getState().items[0].quantity).toBe(2);
+    });
   });
 
   describe("removeItem", () => {
@@ -67,9 +77,15 @@ describe("Cart Store", () => {
 
   describe("updateQuantity", () => {
     it("updates quantity for existing item", () => {
-      useCartStore.getState().addItem(mockItem);
+      useCartStore.getState().addItem(mockItem); // maxStock: 10
       useCartStore.getState().updateQuantity("TSHIRT-BLK-S", 5);
       expect(useCartStore.getState().items[0].quantity).toBe(5);
+    });
+
+    it("caps quantity at maxStock", () => {
+      useCartStore.getState().addItem(mockItem); // maxStock: 10
+      useCartStore.getState().updateQuantity("TSHIRT-BLK-S", 50);
+      expect(useCartStore.getState().items[0].quantity).toBe(10);
     });
 
     it("removes item when quantity is 0", () => {

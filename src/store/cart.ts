@@ -8,6 +8,7 @@ export interface CartItem {
   variantLabel: string;
   unitPrice: number;
   quantity: number;
+  maxStock: number;
   image: string;
 }
 
@@ -17,6 +18,7 @@ interface CartStore {
   addItem: (item: CartItem) => void;
   removeItem: (sku: string) => void;
   updateQuantity: (sku: string, quantity: number) => void;
+  syncStock: (sku: string, newStock: number) => void;
   clearCart: () => void;
   openCart: () => void;
   closeCart: () => void;
@@ -34,15 +36,19 @@ export const useCartStore = create<CartStore>()(
         set((state) => {
           const existing = state.items.find((i) => i.sku === item.sku);
           if (existing) {
+            const newQty = Math.min(existing.quantity + item.quantity, item.maxStock);
+            if (newQty <= 0) return state;
             return {
               items: state.items.map((i) =>
                 i.sku === item.sku
-                  ? { ...i, quantity: i.quantity + item.quantity }
+                  ? { ...i, quantity: newQty, maxStock: item.maxStock }
                   : i
               ),
             };
           }
-          return { items: [...state.items, item] };
+          const cappedQty = Math.min(item.quantity, item.maxStock);
+          if (cappedQty <= 0) return state;
+          return { items: [...state.items, { ...item, quantity: cappedQty }] };
         }),
 
       removeItem: (sku) =>
@@ -55,7 +61,22 @@ export const useCartStore = create<CartStore>()(
           items:
             quantity <= 0
               ? state.items.filter((i) => i.sku !== sku)
-              : state.items.map((i) => (i.sku === sku ? { ...i, quantity } : i)),
+              : state.items.map((i) =>
+                  i.sku === sku
+                    ? { ...i, quantity: Math.min(quantity, i.maxStock) }
+                    : i
+                ),
+        })),
+
+      syncStock: (sku, newStock) =>
+        set((state) => ({
+          items: newStock <= 0
+            ? state.items.filter((i) => i.sku !== sku)
+            : state.items.map((i) =>
+                i.sku === sku
+                  ? { ...i, maxStock: newStock, quantity: Math.min(i.quantity, newStock) }
+                  : i
+              ),
         })),
 
       clearCart: () => set({ items: [] }),

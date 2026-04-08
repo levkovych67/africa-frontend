@@ -58,7 +58,8 @@ function CartCard({ item, index }: { item: CartItem; index: number }) {
             <button
               type="button"
               onClick={() => updateQuantity(item.sku, item.quantity + 1)}
-              className="w-8 h-8 flex items-center justify-center font-jakarta text-sm text-stone-600"
+              disabled={item.quantity >= item.maxStock}
+              className="w-8 h-8 flex items-center justify-center font-jakarta text-sm text-stone-600 disabled:opacity-30"
             >
               +
             </button>

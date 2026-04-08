@@ -18,7 +18,7 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
   const [selectedAttributes, setSelectedAttributes] = useState<
     Record<string, string>
   >({});
-  const { addItem, openCart } = useCartStore();
+  const { addItem, openCart, items: cartItems } = useCartStore();
 
   const attributes = product.attributes ?? [];
   const variants = product.variants ?? [];
@@ -44,7 +44,13 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
     ? attributes.every((attr) => selectedAttributes[attr.type])
     : true;
 
-  const canAddToCart = hasVariants ? (allSelected && isInStock) : false;
+  const cartItem = effectiveVariant
+    ? cartItems.find((i) => i.sku === effectiveVariant.sku)
+    : null;
+  const alreadyInCart = cartItem ? cartItem.quantity : 0;
+  const stockLeft = effectiveVariant ? effectiveVariant.stock - alreadyInCart : 0;
+
+  const canAddToCart = hasVariants ? (allSelected && isInStock && stockLeft > 0) : false;
 
   const handleSelect = (type: string, value: string) => {
     setSelectedAttributes((prev) => ({ ...prev, [type]: value }));
@@ -86,6 +92,7 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
       variantLabel,
       unitPrice: price,
       quantity: 1,
+      maxStock: effectiveVariant.stock,
       image: (product.images ?? [])[0] || "",
     });
 
@@ -141,7 +148,9 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
                 ? "Оберіть варіант"
                 : hasVariants && !isInStock
                   ? "Немає в наявності"
-                  : "Додати в кошик"}
+                  : stockLeft <= 0
+                    ? "Максимум в кошику"
+                    : "Додати в кошик"}
         </PrecisionButton>
       </div>
 

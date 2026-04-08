@@ -99,6 +99,9 @@ export function CheckoutForm() {
   };
 
   const handleSubmit = async () => {
+    // Prevent double-submit
+    if (checkout.isPending) return;
+
     const validationErrors = validateCheckout(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -136,40 +139,42 @@ export function CheckoutForm() {
     try {
       const order = await checkout.mutateAsync(payload);
 
+      // Clear cart after order is created (stock already locked on backend)
+      clearCart();
+      clearSavedForm();
+
       if (paymentMethod === "ONLINE") {
         try {
           if (!order.accessToken) throw new Error("Відсутній токен оплати");
           const redirectUrl = `${window.location.origin}/order/${order.id}?accessToken=${order.accessToken}`;
           const { paymentUrl } = await createPayment(order.id, order.accessToken, redirectUrl);
-          clearCart();
-          clearSavedForm();
           window.location.href = paymentUrl;
         } catch {
-          // Order exists in WAITING_PAYMENT — redirect to order page
-          clearCart();
-          clearSavedForm();
+          // Payment URL creation failed — show order page so user can retry payment
           setOrderAccessToken(order.accessToken ?? null);
           setOrderId(order.id);
         }
       } else {
         setOrderAccessToken(order.accessToken ?? null);
         setOrderId(order.id);
-        clearCart();
-        clearSavedForm();
       }
     } catch (err) {
-      if (err instanceof ApiRequestError && err.status === 400) {
+      if (err instanceof ApiRequestError && (err.status === 400 || err.status === 409 || err.status === 404)) {
         setStockError(err.message);
       } else {
         setStockError("Сталася помилка. Спробуйте ще раз.");
       }
+      // Scroll to error
+      setTimeout(() => {
+        document.querySelector("[data-stock-error]")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
     }
   };
 
   return (
     <div className="max-w-[600px] mx-auto px-6">
       {stockError && (
-        <div className="bg-coral/10 border border-coral/20 rounded-xl p-4 mb-8">
+        <div data-stock-error className="bg-coral/10 border border-coral/20 rounded-xl p-4 mb-8">
           <p className="text-sm text-coral">{stockError}</p>
         </div>
       )}
