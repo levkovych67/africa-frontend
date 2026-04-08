@@ -24,3 +24,4 @@ export function OrderSummary({ items }: OrderSummaryProps) {
     </div>
   );
 }
+
