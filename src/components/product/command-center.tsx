@@ -53,11 +53,22 @@ export function CommandCenter({ product, compact = false }: CommandCenterProps) 
   const getUnavailableValues = (attrType: string): string[] => {
     const attr = attributes.find((a) => a.type === attrType);
     if (!attr) return [];
+
+    // Build partial selection excluding the current attribute type
+    const otherSelected = Object.fromEntries(
+      Object.entries(selectedAttributes).filter(([k]) => k !== attrType)
+    );
+    const otherKeys = Object.keys(otherSelected);
+
     return (attr.values ?? []).filter((value) => {
+      // Find variants matching this value AND all other selected attributes
       const matchingVariants = variants.filter(
-        (v) => v.attributes[attrType] === value
+        (v) =>
+          v.attributes[attrType] === value &&
+          otherKeys.every((k) => v.attributes[k] === otherSelected[k])
       );
-      return matchingVariants.length > 0 && matchingVariants.every((v) => v.stock === 0);
+      // Unavailable if no matching variant exists, or all matching have stock 0
+      return matchingVariants.length === 0 || matchingVariants.every((v) => v.stock === 0);
     });
   };
 

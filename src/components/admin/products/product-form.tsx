@@ -33,7 +33,7 @@ interface ValidationErrors {
   description?: string;
   images?: string;
   variants?: string;
-  variantRows?: Record<number, { sku?: string; attributes?: string; stock?: string }>;
+  variantRows?: Record<number, { sku?: string; attributes?: string; price?: string; stock?: string }>;
 }
 
 export function ProductForm({ product }: ProductFormProps) {
@@ -214,10 +214,21 @@ export function ProductForm({ product }: ProductFormProps) {
     }
 
     // Validate each variant row
-    const variantRowErrors: Record<number, { sku?: string; attributes?: string; stock?: string }> = {};
+    const variantRowErrors: Record<number, { sku?: string; attributes?: string; price?: string; stock?: string }> = {};
+    const seenSkus = new Set<string>();
     variants.forEach((v, i) => {
-      const rowErr: { sku?: string; attributes?: string; stock?: string } = {};
-      if (!v.sku.trim()) rowErr.sku = "SKU обов'язковий";
+      const rowErr: { sku?: string; attributes?: string; price?: string; stock?: string } = {};
+      if (!v.sku.trim()) {
+        rowErr.sku = "SKU обов'язковий";
+      } else {
+        const normalized = v.sku.trim().toLowerCase();
+        if (seenSkus.has(normalized)) {
+          rowErr.sku = "SKU вже використовується";
+        } else {
+          seenSkus.add(normalized);
+        }
+      }
+      if (v.price <= 0) rowErr.price = "Ціна має бути більше 0";
       if (v.stock < 0) rowErr.stock = "Не може бути від'ємним";
       if (Object.keys(rowErr).length > 0) variantRowErrors[i] = rowErr;
     });
@@ -646,8 +657,11 @@ export function ProductForm({ product }: ProductFormProps) {
                               )
                             )
                           }
-                          className="w-24 border border-gray-300 rounded-lg px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
+                          className={`w-24 ${variantInputClass(!!rowErr?.price)}`}
                         />
+                        {rowErr?.price && (
+                          <p className="mt-0.5 text-xs text-red-500">{rowErr.price}</p>
+                        )}
                       </td>
                       <td className="px-3 py-2">
                         <input
