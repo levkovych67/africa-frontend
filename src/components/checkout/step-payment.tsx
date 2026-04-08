@@ -41,7 +41,6 @@ function NovaPoshtaIcon({ className }: { className?: string }) {
 /* ─── Payment card component ──────────────────────────────────────── */
 
 function PaymentCard({
-  method,
   selected,
   onSelect,
   icon,

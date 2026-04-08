@@ -61,28 +61,29 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
 
-  let jsonLdElements = null;
+  let jsonLdData: { product: ReturnType<typeof productJsonLd>; breadcrumb: ReturnType<typeof breadcrumbJsonLd> } | null = null;
   try {
     const product = await getProductBySlug(slug);
-    jsonLdElements = (
-      <>
-        <JsonLd data={productJsonLd(product)} />
-        <JsonLd
-          data={breadcrumbJsonLd([
-            { name: "Головна", url: SITE_URL },
-            { name: "Каталог", url: SITE_URL },
-            { name: product.title },
-          ])}
-        />
-      </>
-    );
+    jsonLdData = {
+      product: productJsonLd(product),
+      breadcrumb: breadcrumbJsonLd([
+        { name: "Головна", url: SITE_URL },
+        { name: "Каталог", url: SITE_URL },
+        { name: product.title },
+      ]),
+    };
   } catch {
     // API unavailable — skip JSON-LD
   }
 
   return (
     <>
-      {jsonLdElements}
+      {jsonLdData && (
+        <>
+          <JsonLd data={jsonLdData.product} />
+          <JsonLd data={jsonLdData.breadcrumb} />
+        </>
+      )}
       <PageTransition>
         <main className="bg-pearl py-8">
           <ProductDetail slug={slug} />
